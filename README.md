@@ -39,5 +39,12 @@ python src/run_loocv_hardness_xgboost.py   # -> outputs/loocv_hardness_xgboost.c
 - Primary MD/DFT raw trajectories and inputs are archived separately (large files);
   available on request.
 
+## Authors & Contributors
+- **Jung Heon Lee** (이정헌) — [@juhelee7](https://github.com/juhelee7) — supervision, corresponding author
+- **Jina Bae** (배진아) — [@jinjin-del](https://github.com/jinjin-del) — experiments (synthesis, XRD/XPS/FTIR, nanoindentation)
+- **Byeongsang** — [@carryer123](https://github.com/carryer123) — MD / DFT / ML computation (this repo)
+
+See [`CONTRIBUTORS.md`](CONTRIBUTORS.md).
+
 ## Citation
 Chen, T. & Guestrin, C. *XGBoost: A Scalable Tree Boosting System.* KDD 2016.

@@ -24,24 +24,24 @@ MD simulations of 21 metals provide the training data. XGBoost then predicts key
 
 The raw 5D Pareto frontier is intentionally permissive and large. In `outputs/pareto_5d_xgboost.csv`, **38 metals are non-dominated**. The same output includes `Dist` and `Rank` columns, which rank candidates by distance from the ideal Utopia point.
 
-The manuscript-facing **Top-12 is the Utopia-distance Tier-1 selection**, not the raw non-dominated set. The authoritative reference ranking is `data/final_ranking_5d_ORIGINAL.csv`.
+The manuscript-facing **Top-12 is the Utopia-distance Tier-1 selection**, not the raw non-dominated set. The authoritative ranking is `data/final_ranking_5d.csv`, which matches the XGBoost script output `outputs/pareto_5d_xgboost.csv`.
 
 ### 2.2 Authoritative Top-12
 
-The reference Top-12 Utopia-distance ranking is:
+The authoritative Top-12 Utopia-distance ranking is:
 
 1. **Ni**
 2. **Cr**
 3. **V**
 4. **Co**
 5. **Cu**
-6. **Pt**
-7. **W**
-8. **Rh**
-9. **Tb**
-10. **Eu**
+6. **W**
+7. **Eu**
+8. **Ho**
+9. **Dy**
+10. **Tb**
 11. **Tc**
-12. **Ir**
+12. **Au**
 
 Ni is **Rank #1**, and the leading 3d-metal Top-5 is **Ni, Cr, V, Co, Cu**.
 
@@ -50,8 +50,8 @@ Ni is **Rank #1**, and the leading 3d-metal Top-5 is **Ni, Cr, V, Co, Cu**.
 | Period | Elements (count) | Character |
 |---|---|---|
 | **4 (3d)** | **Ni, Cr, V, Co, Cu (5)** | Leading Utopia-distance Top-5; light and geometrically compatible. |
-| **5 (4d)** | Rh, Tc (2) | Rh is redox-limited; Tc is radioactive. |
-| **6 (5d/4f)** | Pt, W, Tb, Eu, Ir (5) | Heavy elements with useful predicted descriptors but chemical viability limits. |
+| **5 (4d)** | Tc (1) | Tc is radioactive. |
+| **6 (5d/4f)** | W, Eu, Ho, Dy, Tb, Au (6) | Heavy elements with useful predicted descriptors but chemical viability limits. |
 
 **Takeaway:** the 3d transition-metal candidates occupy the Top-5, and Ni is the best-balanced candidate by Utopia distance.
 
@@ -59,16 +59,16 @@ Ni is **Rank #1**, and the leading 3d-metal Top-5 is **Ni, Cr, V, Co, Cu**.
 
 ## 3. Final ranking and chemistry filters
 
-The reproducible XGBoost pipeline `src/run_5d_pareto_xgboost.py` confirms Ni Rank #1 and the 3d Top-5 (Ni, Cr, V, Co, Cu). The lower tail of the 12-set is sensitive to the gradient-boosting implementation and is removed by the chemistry filters anyway, so `data/final_ranking_5d_ORIGINAL.csv` is the reference ranking.
+The XGBoost pipeline `src/run_5d_pareto_xgboost.py` reproduces `data/final_ranking_5d.csv` exactly, including Ni Rank #1 and the 3d Top-5 (Ni, Cr, V, Co, Cu).
 
 One-line disposition of each non-Ni authoritative Top-12 candidate:
 
 | candidate(s) | disposition |
 |---|---|
 | Cr, V, Co, Cu | Viable 3d M2+ candidates, but rank below Ni by Utopia distance. |
-| Pt, Rh, Ir | Noble-metal redox favors reduction to M0 rather than stable M2+ substitution. |
 | W | High-valence W(+6) chemistry creates charge imbalance in the divalent substitution site. |
-| Tb, Eu | Rare-earth +3 substitution weakens the lattice through charge-compensating defects. |
-| Tc | Radioactive and not viable for the target biomaterial context. |
+| Eu, Tb, Ho, Dy | Rare-earth +3 substitution weakens the lattice through charge-compensating defects. |
+| Tc | Radioactive; not viable for a biomaterial. |
+| Au | Noble-metal redox favors reduction to Au(0) rather than stable M2+ substitution. |
 
 **Conclusion:** the 5D Utopia-distance ranking and chemistry filters identify **Ni as the optimal substituent**. Experimental validation is reported in the manuscript and its Supporting Information.

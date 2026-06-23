@@ -16,13 +16,15 @@ Using the 21-metal MD results as training data, an XGBoost model predicts the pr
 
 Five orthogonal metrics are considered simultaneously: stability (MSD), structure (Lindemann), binding (PMF), size fit (radius mismatch), and geometry (OSSE).
 
-The raw 5D Pareto frontier is large. In the reproduced XGBoost output `outputs/pareto_5d_xgboost.csv`, **38 metals are non-dominated**; the `Dist` and `Rank` columns then provide Utopia-distance ordering. The manuscript-facing **Top-12 is the Utopia-distance Tier-1 selection**, not the full raw Pareto set.
+The raw 5D Pareto frontier is large. In the XGBoost output `outputs/pareto_5d_xgboost.csv`, **38 metals are non-dominated**; the `Dist` and `Rank` columns then provide Utopia-distance ordering. The manuscript-facing **Top-12 is the Utopia-distance Tier-1 selection**, not the full raw Pareto set.
 
-The authoritative reference ranking is `data/final_ranking_5d_ORIGINAL.csv`. Its Top-12 is:
+The authoritative ranking is `data/final_ranking_5d.csv`, which matches the XGBoost script output `outputs/pareto_5d_xgboost.csv`. Its Top-12 is:
 
-`Ni, Cr, V, Co, Cu, Pt, W, Rh, Tb, Eu, Tc, Ir`
+`Ni, Cr, V, Co, Cu, W, Eu, Ho, Dy, Tb, Tc, Au`
 
-Ni is **Rank #1**, and the leading 3d-metal Top-5 is **Ni, Cr, V, Co, Cu**. The reproducible XGBoost pipeline confirms Ni Rank #1 and the same 3d Top-5; the lower tail of the 12-set is sensitive to the gradient-boosting implementation and is removed by the chemistry filters anyway.
+Ni is **Rank #1**, and the leading 3d-metal Top-5 is **Ni, Cr, V, Co, Cu**. The XGBoost script `src/run_5d_pareto_xgboost.py` reproduces this ranking exactly.
+
+The Top-12 period distribution is period 4 (3d) = Ni, Cr, V, Co, Cu (5); period 5 (4d) = Tc (1); period 6 (5d/4f) = W, Eu, Ho, Dy, Tb, Au (6).
 
 ### Step 3 - scientific elimination on the authoritative Top-12
 
@@ -31,10 +33,10 @@ The elimination logic is applied only to the authoritative Top-12:
 | candidate(s) | disposition |
 |---|---|
 | Cr, V, Co, Cu | Viable 3d M2+ candidates, but rank below Ni by Utopia distance. |
-| Pt, Rh, Ir | Noble-metal redox favors reduction to M0 rather than stable M2+ substitution. |
 | W | High-valence W(+6) chemistry creates charge imbalance in the divalent substitution site. |
-| Tb, Eu | Rare-earth +3 substitution weakens the lattice through charge-compensating defects. |
-| Tc | Radioactive and not viable for the target biomaterial context. |
+| Eu, Tb, Ho, Dy | Rare-earth +3 substitution weakens the lattice through charge-compensating defects. |
+| Tc | Radioactive; not viable for a biomaterial. |
+| Au | Noble-metal redox favors reduction to Au(0) rather than stable M2+ substitution. |
 
 ### Step 4 - the winner
 

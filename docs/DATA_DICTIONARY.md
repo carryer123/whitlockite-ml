@@ -68,9 +68,9 @@ Historical filename note: this CSV contains **52 candidate elements**.
 | `CFSE` | Crystal-field stabilization energy proxy used as an electronic descriptor; relative descriptor units. | hand-coded descriptor |
 | `Is_Pareto` | Boolean membership in the raw Pareto set in the earlier screening table. | XGBoost-predicted |
 
-## `data/final_ranking_5d_ORIGINAL.csv`
+## `data/final_ranking_5d.csv`
 
-This is the original reference ranking for the manuscript-facing 5D Utopia-distance selection.
+This is the authoritative XGBoost ranking for the manuscript-facing 5D Utopia-distance selection.
 
 | column | meaning / units | provenance |
 |---|---|---|

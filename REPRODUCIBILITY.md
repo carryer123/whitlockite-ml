@@ -12,6 +12,9 @@ python src/predict_candidates_xgboost.py
 python src/run_loocv_hardness_xgboost.py
 ```
 
+> On Windows, use the `py` launcher if `python` resolves to the Microsoft Store stub
+> (e.g. `py src/physics_score_21metals.py`).
+
 ## Expected console output (key lines)
 
 `python src/physics_score_21metals.py`

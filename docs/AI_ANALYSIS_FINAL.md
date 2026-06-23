@@ -1,6 +1,6 @@
 # AI/ML Screening — Physics Score and XGBoost Extension
 
-This note documents how the computational results in this repository form a predictive system for **rational materials design**, and how they rank **Ni** as the top divalent substituent for whitlockite (Rank #1 by the computational screen; the experimental confirmation of optimality is in the manuscript).
+This note documents how the computational results in this repository form a predictive system for **rational materials design**, and how they rank **Ni** as the top divalent substituent for whitlockite (Rank #1 by the computational screen; the experimental confirmation of Ni's superior reinforcement is in the manuscript).
 
 ---
 
@@ -48,4 +48,4 @@ The viable, biocompatible, synthesizable survivors are 3d transition metals; **N
 
 ## 5. Conclusion
 
-The Physics-Score ranking (Ni #1), the XGBoost extension (Ni #1), and the Stage-3 chemistry filter together make **Ni the top-ranked viable substituent** in this computational screen. The hardness model and DFT (Sections in the README) give the mechanistic, CFSE-based rationale. The experimental confirmation that Ni is optimal is reported in the manuscript and its Supporting Information.
+The Physics-Score ranking (Ni #1), the XGBoost extension (Ni #1), and the Stage-3 chemistry filter together make **Ni the top-ranked viable substituent** in this computational screen. The hardness model and DFT (Sections in the README) give the mechanistic, CFSE-based rationale. The experimental confirmation of Ni's superior reinforcement is reported in the manuscript and its Supporting Information.

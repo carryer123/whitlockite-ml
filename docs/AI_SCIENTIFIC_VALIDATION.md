@@ -1,6 +1,6 @@
 # Scientific Validation of the AI-Driven Screen: Why Ni?
 
-This note explains why **Ni is the top-ranked substituent for whitlockite reinforcement (Rank #1)** in this computational screen — from a physics-based score, an XGBoost extension, and science-based elimination, without using experimental hardness in the scoring. (The experimental confirmation that Ni is optimal is reported in the manuscript.)
+This note explains why **Ni is the top-ranked substituent for whitlockite reinforcement (Rank #1)** in this computational screen — from a physics-based score, an XGBoost extension, and science-based elimination, without using experimental hardness in the scoring. (The experimental confirmation of Ni's superior performance is reported in the manuscript.)
 
 ---
 

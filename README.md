@@ -6,7 +6,7 @@
 [![DFT](https://img.shields.io/badge/DFT-Quantum%20ESPRESSO%20%2B%20LOBSTER-blue?style=flat-square)](#5-dft-verification)
 [![Paper](https://img.shields.io/badge/manuscript-Advanced%20Materials-orange?style=flat-square)](#citation)
 
-The **computational pipeline** behind the PAiCER manuscript ranks **nickel (Ni)** as the **top divalent substituent** for metal-substituted **whitlockite** (a calcium-phosphate bone-graft biomaterial) — Rank #1 by this computational screen after the stated chemical filters. (The experimental confirmation that Ni is optimal is reported in the manuscript, not in this repository.) The screen runs molecular dynamics → a physics-based scoring function → an XGBoost extension over the full candidate library, and ranks **Ni at #1 with a Physics Score of 282.19**.
+The **computational pipeline** behind the PAiCER manuscript ranks **nickel (Ni)** as the **top divalent substituent** for metal-substituted **whitlockite** (a calcium-phosphate bone-graft biomaterial) — Rank #1 by this computational screen after the stated chemical filters. (The experimental confirmation of Ni's superior reinforcement is reported in the manuscript, not in this repository.) The screen runs molecular dynamics → a physics-based scoring function → an XGBoost extension over the full candidate library, and ranks **Ni at #1 with a Physics Score of 282.19**.
 
 > **Scientific question.** Which substituent M gives the best reinforcement profile in metal-substituted whitlockite?
 > **Hypothesis.** A d8 transition metal (Ni) maximizes strength through crystal-field stabilization (CFSE) and a regular octahedral preference in a distorted lattice.

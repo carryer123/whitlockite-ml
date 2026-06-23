@@ -83,7 +83,6 @@ src/        XGBoost ML pipeline (5D Pareto, LOOCV hardness)  — reproducible
 data/       MD descriptors (21 metals), 45-element predictions, rankings, hardness (n=4)
 figures/    5D Pareto / radar / scree-plot result figures
 docs/        AI analysis & validation, DFT convergence, Pareto survivor analysis
-reference/  original sklearn screening scripts (provenance / comparison)
 outputs/    reproduced result CSVs
 ```
 

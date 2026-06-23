@@ -88,9 +88,9 @@ outputs/    reproduced result CSVs
 ```
 
 ## Authors & Contributors
-- **Jung Heon Lee** (이정헌) — [@juhelee7](https://github.com/juhelee7) — supervision, corresponding author
-- **Jina Bae** (배진아) — [@jinjin-del](https://github.com/jinjin-del) — experiments (synthesis & characterization)
-- **Byoungsang Lee** (이병상) — [@carryer123](https://github.com/carryer123) — MD / DFT / ML computation (this repo)
+- **Jung Heon Lee** — [@juhelee7](https://github.com/juhelee7) — supervision, corresponding author
+- **Jina Bae** — [@jinjin-del](https://github.com/jinjin-del) — experiments (synthesis & characterization)
+- **Byoungsang Lee** — [@carryer123](https://github.com/carryer123) — MD / DFT / ML computation (this repo)
 
 See [`CONTRIBUTORS.md`](CONTRIBUTORS.md).
 

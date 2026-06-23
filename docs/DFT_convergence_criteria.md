@@ -1,47 +1,45 @@
-# DFT 수렴 조건 및 판단 기준 (Convergence Criteria)
+# DFT Convergence Criteria (Quantum ESPRESSO)
 
-본 문서는 Quantum ESPRESSO를 이용한 DFT 계산 시, 계산이 성공적으로 완료되었는지 판단하는 3가지 핵심 기준(Criteria)과 그 과학적 의미를 설명합니다.
-
----
-
-## 1. 전자 밀도 수렴 (SCF Convergence)
-전자의 바닥 상태(Ground State)를 찾기 위한 Self-Consistent Field (SCF) 루프의 종료 조건입니다.
-
-*   **파라미터:** `conv_thr` (Convergence Threshold)
-*   **일반적인 기준값:** $1.0 \times 10^{-6}$ ~ $1.0 \times 10^{-8}$ Ry
-*   **의미:**
-    *   입력 전하 밀도($\rho_{in}$)와 출력 전하 밀도($\rho_{out}$)의 차이(Error)가 이 값보다 작아져야 합니다.
-    *   **"Estimated scf accuracy"** 로그가 이 값 밑으로 떨어지면 SCF가 종료됩니다.
-*   **참고 문헌:** *Giannozzi et al., J. Phys.: Condens. Matter 21, 395502 (2009).* (QE Main Paper).
-
-## 2. 이온 완화 수렴 (Ionic Convergence / Geometry Optimization)
-원자들의 위치를 최적화(`relax`)할 때, 원자들이 평형 위치에 도달했는지 판단하는 기준입니다.
-
-*   **파라미터 1:** `etot_conv_thr` (Energy Threshold)
-    *   **기준값:** $1.0 \times 10^{-4}$ Ry
-    *   **의미:** 이전 스텝과 현재 스텝의 **총 에너지 차이**가 이 값보다 작아야 합니다. (에너지가 바닥을 쳤는가?)
-*   **파라미터 2:** `forc_conv_thr` (Force Threshold)
-    *   **기준값:** $1.0 \times 10^{-3}$ Ry/Bohr
-    *   **의미:** 모든 원자에 작용하는 **힘(Force)**이 이 값보다 작아야 합니다. (원자가 더 이상 움직일 이유가 없는가?)
-*   **판단:** 위 두 조건이 모두 만족되어야 `bfgs` 알고리즘이 종료됩니다.
-
-## 3. 셀 완화 수렴 (Cell Convergence / Variable Cell Relaxation)
-셀의 부피와 모양까지 최적화(`vc-relax`)할 때 추가되는 기준입니다.
-
-*   **파라미터:** `press_conv_thr` (Pressure Threshold)
-    *   **기준값:** 0.5 kbar (0.5 ~ 1.0 kbar)
-    *   **의미:** 시스템 전체에 걸리는 **압력(Stress)**이 목표 압력(보통 0)과 비슷해졌는가?
-*   **주의:** `vc-relax`는 Force와 Pressure가 동시에 수렴해야 하므로 가장 까다롭습니다.
+Three criteria used to decide whether a Quantum ESPRESSO calculation has successfully converged,
+and their physical meaning.
 
 ---
 
-## 요약 (Summary Checklist)
+## 1. Electronic (SCF) convergence
+Termination condition of the self-consistent-field loop that finds the electronic ground state.
+- **Parameter:** `conv_thr` (convergence threshold)
+- **Typical value:** 1.0×10⁻⁶ – 1.0×10⁻⁸ Ry
+- **Meaning:** the difference between input (ρ_in) and output (ρ_out) charge density must fall below
+  this value; SCF stops when the *estimated scf accuracy* drops below `conv_thr`.
+- **Reference:** Giannozzi et al., *J. Phys.: Condens. Matter* **21**, 395502 (2009) (the QE paper).
 
-| 구분 | 파라미터 | 권장값 | 의미 |
-| :--- | :--- | :--- | :--- |
-| **전자** | `conv_thr` | `1.0d-6` Ry | 전자 밀도 합의 완료 |
-| **에너지** | `etot_conv_thr` | `1.0d-4` Ry | 에너지 변화 없음 |
-| **힘** | `forc_conv_thr` | `1.0d-3` Ry/Bohr | 원자 이동 멈춤 |
-| **압력** | `press_conv_thr` | `0.5` kbar | 셀 크기 고정 |
+## 2. Ionic convergence (geometry optimization)
+For `relax`, the criterion that atoms have reached equilibrium positions.
+- **Energy:** `etot_conv_thr` — typical 1.0×10⁻⁴ Ry. The total-energy change between steps must be
+  below this value (energy has bottomed out).
+- **Force:** `forc_conv_thr` — typical 1.0×10⁻³ Ry/Bohr. The force on every atom must be below this
+  value (atoms have no reason to move further).
+- Both must be satisfied for the BFGS optimizer to terminate.
 
-이 조건들을 모두 만족했을 때 비로소 **"JOB DONE"** 메시지가 출력됩니다.
+## 3. Cell convergence (variable-cell relaxation)
+Additional criterion for `vc-relax` (optimizing cell volume/shape).
+- **Pressure:** `press_conv_thr` — typical 0.5 kbar (0.5–1.0 kbar). The system stress must approach
+  the target pressure (usually 0).
+- **Note:** `vc-relax` is the most demanding because force and pressure must converge simultaneously.
+
+---
+
+## Summary checklist
+
+| Quantity | Parameter | Recommended | Meaning |
+|---|---|---|---|
+| Electronic | `conv_thr` | 1.0d-6 Ry | charge density self-consistent |
+| Energy | `etot_conv_thr` | 1.0d-4 Ry | energy no longer changing |
+| Force | `forc_conv_thr` | 1.0d-3 Ry/Bohr | atoms no longer moving |
+| Pressure | `press_conv_thr` | 0.5 kbar | cell size fixed |
+
+Only when all applicable conditions are met does QE print **"JOB DONE"**.
+
+> Note for this system (Ni-whitlockite): near-degenerate high/low-spin Ni causes charge sloshing and
+> spin frustration. This is mitigated by a 42-atom primitive cell and a 2-step protocol
+> (`nspin=1` geometry relaxation → `nspin=2` energy evaluation).

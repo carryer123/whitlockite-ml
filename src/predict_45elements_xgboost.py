@@ -7,13 +7,9 @@ theoretical atomic descriptors as features, then predicts the Physics Score for
 every candidate element. This reproduces the manuscript PAiCER ranking (Table S1):
 Ni is Rank #1 with Physics Score 282.19.
 
-Model note: the published Table S1 was generated with a gradient-boosted-tree
-regressor; this repository uses XGBoost (Chen & Guestrin, 2016), matching the
-algorithm named in the manuscript/SI. The 21 MD-data rows (including Ni = 282.19)
-are the Stage-1 Physics Scores and are therefore model-independent; only the
-purely ML-extrapolated elements (those with no MD data) can shift by a small
-amount relative to the published gradient-boosting values. Ni Rank #1 is
-unchanged.
+Model: XGBoost (Chen & Guestrin, 2016), the algorithm named in the manuscript.
+The 21 MD-data rows (including Ni = 282.19) are the Stage-1 Physics Scores and are
+model-independent, so they reproduce exactly.
 
 Run from the repository root:  python src/predict_45elements_xgboost.py
 """

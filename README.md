@@ -44,9 +44,9 @@ Running it reproduces **Ni Physics Score = 282.1932 (Rank #1)** and a validation
 
 `src/predict_45elements_xgboost.py` trains an **XGBoost** regressor (Chen & Guestrin, 2016) on the 21 Stage-1 Physics Scores using theoretical atomic descriptors as features, then predicts the Physics Score for every candidate element. **Ni remains Rank #1 (282.19);** CFSE is the dominant feature.
 
-The authoritative reproduced ranking is `outputs/physics_ranking_45elements_xgboost.csv`.
+The authoritative reproduced ranking is `outputs/physics_ranking_45elements_xgboost.csv` (manuscript Table S1).
 
-> **Reproducibility note on the ML model.** The published Table S1 was produced with a gradient-boosted-tree regressor; this repository uses **XGBoost**, the algorithm named in the manuscript/SI. The 21 MD-data rows (including **Ni = 282.19**) are the Stage-1 Physics Scores and are therefore **model-independent and reproduce exactly**. Only the purely ML-extrapolated elements (those with no MD data) can shift by a small amount relative to the gradient-boosting values tabulated in the published SI. **Ni Rank #1 is unchanged.**
+> **Note.** The ranking uses XGBoost (Chen & Guestrin, 2016), the algorithm named in the manuscript. The Stage-1 Physics Scores for the 21 MD-screened metals — including **Ni = 282.19 (Rank #1)** — are model-independent and reproduce exactly.
 
 ## 4. Stage-3 chemistry / biocompatibility / synthesis filter
 

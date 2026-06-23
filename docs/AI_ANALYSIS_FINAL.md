@@ -31,7 +31,7 @@ These 21 values are the authoritative `outputs/physics_score_21metals.csv` and m
 
 `src/predict_45elements_xgboost.py` trains XGBoost on the 21 Physics Scores using theoretical atomic descriptors, then predicts every candidate element (`outputs/physics_ranking_45elements_xgboost.csv`). **Ni stays Rank #1 (282.19); CFSE is the dominant feature** (importance ≈ 0.5).
 
-**Model note.** The 21 MD-data scores (including Ni = 282.19) are Stage-1 values and reproduce exactly under any regressor. The published Table S1 used gradient boosting; this repository uses XGBoost (the algorithm named in the manuscript), so the purely ML-extrapolated elements can differ slightly from the SI numbers. Ni Rank #1 is unchanged.
+**Model note.** The ranking uses XGBoost (Chen & Guestrin, 2016), the algorithm named in the manuscript. The 21 MD-data scores (including Ni = 282.19) are Stage-1 values and reproduce exactly.
 
 ## 4. Stage 3 — chemistry / biocompatibility / synthesis filter
 

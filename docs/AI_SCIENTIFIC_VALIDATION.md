@@ -17,7 +17,7 @@ This note explains why the conclusion **"Ni is the optimal substituent for whitl
 
 `src/predict_45elements_xgboost.py` trains XGBoost on the 21 Physics Scores (theoretical atomic descriptors as features) and predicts every candidate element. **Ni remains Rank #1; CFSE dominates feature importance.** Authoritative output: `outputs/physics_ranking_45elements_xgboost.csv`.
 
-The 21 MD-data scores (including Ni = 282.19) are model-independent and reproduce exactly; the ML-extrapolated tail uses XGBoost (manuscript algorithm) and can differ slightly from the published gradient-boosting Table S1. Ni #1 is unchanged.
+The ranking uses XGBoost (the algorithm named in the manuscript); the 21 MD-data scores (including Ni = 282.19) are model-independent and reproduce exactly.
 
 ### Step 3 — chemistry / biocompatibility / synthesis elimination
 

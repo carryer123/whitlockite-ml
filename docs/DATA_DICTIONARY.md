@@ -1,106 +1,46 @@
 # Data Dictionary
 
-This dictionary describes the CSV files under `data/`. Provenance labels are: MD-derived, XGBoost-predicted, experimental, and hand-coded descriptor.
+Describes the CSV files under `data/` (pipeline inputs) and `outputs/` (reproduced results).
+Provenance labels: MD-derived, calculated (theory), experimental, hand-coded descriptor.
 
-## `data/md_timepoint_scores_21metals.csv`
+## Inputs — `data/`
 
-| column | meaning / units | provenance |
-|---|---|---|
-| `Rank` | Rank from the integrated MD timepoint scoring workflow; unitless. | MD-derived |
-| `Metal` | Metal substituent symbol. | hand-coded descriptor |
-| `Integrated_Score` | Combined RDF/MSD stability score; unitless workflow score. | MD-derived |
-| `RDF_10ns` | RDF-derived score at 10 ns; unitless workflow score. | MD-derived |
-| `RDF_20ns` | RDF-derived score at 20 ns; unitless workflow score. | MD-derived |
-| `RDF_30ns` | RDF-derived score at 30 ns; unitless workflow score. | MD-derived |
-| `RDF_40ns` | RDF-derived score at 40 ns; unitless workflow score. | MD-derived |
-| `RDF_50ns` | RDF-derived score at 50 ns; unitless workflow score. | MD-derived |
-| `MSD_10ns` | Mean-squared-displacement-derived score at 10 ns; workflow MSD units. | MD-derived |
-| `MSD_20ns` | Mean-squared-displacement-derived score at 20 ns; workflow MSD units. | MD-derived |
-| `MSD_30ns` | Mean-squared-displacement-derived score at 30 ns; workflow MSD units. | MD-derived |
-| `MSD_40ns` | Mean-squared-displacement-derived score at 40 ns; workflow MSD units. | MD-derived |
-| `MSD_50ns` | Mean-squared-displacement-derived score at 50 ns; workflow MSD units. | MD-derived |
-| `Avg_RDF_Score` | Average RDF score over sampled timepoints; unitless. | MD-derived |
-| `Avg_MSD_Score` | Average MSD score over sampled timepoints; unitless. | MD-derived |
-| `Final_RDF_Score` | Final weighted RDF score; unitless. | MD-derived |
-| `Final_MSD_Score` | Final weighted MSD score; unitless. | MD-derived |
-| `RDF_Temporal_Stability` | RDF temporal stability score; unitless. | MD-derived |
-| `MSD_Temporal_Stability` | MSD temporal stability score; unitless. | MD-derived |
-| `RDF_Trend_Score` | RDF trend score across timepoints; unitless. | MD-derived |
-| `MSD_Trend_Score` | MSD trend score across timepoints; unitless. | MD-derived |
+### `data/md_timepoint_scores_21metals.csv`  (MD-derived)
+Integrated RDF/MSD timepoint scores for the 21 metals. Columns used by the Physics Score:
+`Metal`, `MSD_50ns`, `MSD_Temporal_Stability`, `MSD_Trend_Score` (plus per-timepoint RDF/MSD columns).
 
-## `data/spatial_heterogeneity_21metals.csv`
+### `data/spatial_heterogeneity_21metals.csv`  (MD-derived)
+Local-structure heterogeneity. Columns used: `metal`, `lindemann_cv`, `cn_cv`
+(also includes `lindemann_mean/std`, `cn_mean/std`).
 
-| column | meaning / units | provenance |
-|---|---|---|
-| `cn_cv` | Coefficient of variation for coordination number; percent / unitless ratio. | MD-derived |
-| `cn_mean` | Mean coordination number around the metal site; count. | MD-derived |
-| `cn_std` | Standard deviation of coordination number; count. | MD-derived |
-| `lindemann_cv` | Coefficient of variation for the Lindemann index; percent / unitless ratio. | MD-derived |
-| `lindemann_mean` | Mean Lindemann index; unitless. | MD-derived |
-| `lindemann_std` | Standard deviation of the Lindemann index; unitless. | MD-derived |
-| `metal` | Metal substituent symbol. | hand-coded descriptor |
+### `data/time_dependent_scores_21metals.csv`  (MD-derived)
+Time-resolved RDF/score descriptors. Columns used: `metal`, `rdf_peak_height`, `rdf_peak_width`,
+`score_10ns`…`score_50ns`.
 
-## `data/pmf_results.csv`
+### `data/xrd_calc_peaks_21metals.csv`  (calculated)
+`Metal`, `Calc_Peaks` — number of **calculated** XRD peaks from the simulated structures
+(experimental columns from the source summary were dropped; this repository is computational-only).
 
-| column | meaning / units | provenance |
-|---|---|---|
-| `metal` | Metal substituent symbol. | hand-coded descriptor |
-| `PMF_depth` | Depth of the potential-of-mean-force well; kJ/mol in this workflow. More negative values indicate deeper binding. | MD-derived |
+### `data/hardness_4metals.csv`  (experimental + hand-coded descriptors)
+`Metal`, atomic/ionic descriptors, and `exp_hardness_MPa` for the four measured metals (Mg/Co/Ni/Cu).
+Used by the hardness model; the hardness values are used for validation/feature-importance only.
 
-## `data/md_potential_energy_21metals.csv`
+### `data/md_potential_energy_21metals.csv`, `data/pmf_results.csv`  (MD-derived, supporting)
+Supporting MD descriptors (potential energy; PMF binding-well depth) retained as provenance for
+statements made in the manuscript; not inputs to the Physics Score pipeline.
 
-| column | meaning / units | provenance |
-|---|---|---|
-| `Metal` | Metal substituent symbol. | hand-coded descriptor |
-| `Group` | Periodic-table grouping used for analysis plots and summaries. | hand-coded descriptor |
-| `Potential_Energy` | MD potential energy from the GROMACS workflow; kJ/mol in this workflow. | MD-derived |
+## Outputs — `outputs/`
 
-## `data/ai_prediction_raw_45elements.csv`
+### `outputs/physics_score_21metals.csv`  (reproduced; Stage 1)
+`Metal`, `Physics_Score`, `Experimental`. Authoritative Physics Score for the 21 metals;
+**Ni = 282.1932 (Rank #1)**. Regenerated by `src/physics_score_21metals.py`.
 
-Historical filename note: this CSV contains **52 candidate elements**.
+### `outputs/physics_ranking_45elements_xgboost.csv`  (reproduced; Stage 2)
+`Metal`, `Score`, `Type` (MD Data / ML Prediction), `Experimental`, `Rank`. XGBoost extension of the
+Physics Score to the full candidate library; **Ni Rank #1**. Regenerated by
+`src/predict_45elements_xgboost.py`. `Type = MD Data` rows are Stage-1 values (model-independent);
+`Type = ML Prediction` rows are XGBoost extrapolations.
 
-| column | meaning / units | provenance |
-|---|---|---|
-| `Metal` | Candidate metal element symbol. | hand-coded descriptor |
-| `MSD` | Candidate MSD descriptor used by the 5D screen; MD-derived for training metals and XGBoost-predicted for unsimulated candidates. | MD-derived / XGBoost-predicted |
-| `Lindemann` | Candidate Lindemann descriptor; MD-derived for training metals and XGBoost-predicted for unsimulated candidates. | MD-derived / XGBoost-predicted |
-| `CN_std` | Coordination-number standard deviation used as a local heterogeneity descriptor; count. | MD-derived / XGBoost-predicted |
-| `CFSE` | Crystal-field stabilization energy proxy used as an electronic descriptor; relative descriptor units. | hand-coded descriptor |
-| `Is_Pareto` | Boolean membership in the raw Pareto set in the earlier screening table. | XGBoost-predicted |
-
-## `data/final_ranking_5d.csv`
-
-This is the authoritative XGBoost ranking for the manuscript-facing 5D Utopia-distance selection.
-
-| column | meaning / units | provenance |
-|---|---|---|
-| `Metal` | Candidate metal element symbol. | hand-coded descriptor |
-| `MSD` | Candidate MSD descriptor used in the 5D ranking. | MD-derived / XGBoost-predicted |
-| `Lindemann` | Candidate Lindemann descriptor used in the 5D ranking; unitless. | MD-derived / XGBoost-predicted |
-| `PMF` | Candidate PMF depth used in the 5D ranking; kJ/mol in this workflow. | MD-derived / XGBoost-predicted |
-| `Radius_Mismatch` | Absolute ionic-radius mismatch relative to the reference site radius; angstrom in this workflow. | hand-coded descriptor |
-| `OSSE` | Octahedral site stabilization energy proxy; relative descriptor units. | hand-coded descriptor |
-| `S_MSD` | Normalized MSD score, scaled so higher is better; unitless. | XGBoost-predicted |
-| `S_Lind` | Normalized Lindemann score, scaled so higher is better; unitless. | XGBoost-predicted |
-| `S_PMF` | Normalized PMF score, scaled so higher is better; unitless. | XGBoost-predicted |
-| `S_Rad` | Normalized radius-mismatch score, scaled so higher is better; unitless. | hand-coded descriptor |
-| `S_OSSE` | Normalized OSSE score, scaled so higher is better; unitless. | hand-coded descriptor |
-| `Dist` | Euclidean distance from the 5D Utopia point; lower is better. | XGBoost-predicted |
-| `Rank` | Utopia-distance rank; 1 is best. | XGBoost-predicted |
-
-## `data/hardness_4metals.csv`
-
-| column | meaning / units | provenance |
-|---|---|---|
-| `Metal` | Metal substituent symbol. | hand-coded descriptor |
-| `atomic_num` | Atomic number. | hand-coded descriptor |
-| `ionic_radius` | Ionic radius; angstrom. | hand-coded descriptor |
-| `electronegativity` | Pauling electronegativity. | hand-coded descriptor |
-| `d_electrons` | Nominal d-electron count. | hand-coded descriptor |
-| `CFSE` | Crystal-field stabilization energy proxy; relative descriptor units. | hand-coded descriptor |
-| `ionization_E` | First ionization energy descriptor; eV. | hand-coded descriptor |
-| `atomic_mass` | Atomic mass; atomic mass units. | hand-coded descriptor |
-| `valence_e` | Valence electron count. | hand-coded descriptor |
-| `electron_affinity` | Electron affinity descriptor; eV. | hand-coded descriptor |
-| `polarizability` | Atomic polarizability descriptor; cubic angstrom in this workflow. | hand-coded descriptor |
-| `exp_hardness_MPa` | Experimentally measured hardness used for the n = 4 hardness model; MPa. | experimental |
+### `outputs/loocv_hardness_xgboost.csv`, `outputs/hardness_fullfit_importance_xgboost.csv`  (reproduced)
+Hardness model: per-fold leave-one-out diagnostic (n = 4, statistically limited) and the robust
+full-fit feature importance (CFSE-dominant). Regenerated by `src/run_loocv_hardness_xgboost.py`.

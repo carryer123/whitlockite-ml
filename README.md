@@ -1,119 +1,104 @@
-# Ni-Whitlockite: Computational Screening (MD -> AI -> DFT)
+# Ni-Whitlockite: Computational Screening (MD → Physics Score → XGBoost)
 
-[![Method](https://img.shields.io/badge/method-MD%20%E2%86%92%20AI%20%E2%86%92%20DFT-blue?style=flat-square)](#pipeline)
-[![Model](https://img.shields.io/badge/ML-XGBoost%205D%20Pareto-success?style=flat-square)](#3-aiml-52-element-screening)
-[![MD](https://img.shields.io/badge/MD-GROMACS%2021%20metals-blue?style=flat-square)](#2-md-screening-21-metals)
-[![DFT](https://img.shields.io/badge/DFT-Quantum%20ESPRESSO%20%2B%20LOBSTER-blue?style=flat-square)](#4-dft-verification)
+[![Method](https://img.shields.io/badge/method-MD%20%E2%86%92%20PhysicsScore%20%E2%86%92%20XGBoost-blue?style=flat-square)](#pipeline)
+[![Model](https://img.shields.io/badge/ML-XGBoost-success?style=flat-square)](#3-xgboost-extension-to-the-candidate-library)
+[![MD](https://img.shields.io/badge/MD-GROMACS%2021%20metals-blue?style=flat-square)](#2-physics-score-21-metals)
+[![DFT](https://img.shields.io/badge/DFT-Quantum%20ESPRESSO%20%2B%20LOBSTER-blue?style=flat-square)](#5-dft-verification)
 [![Paper](https://img.shields.io/badge/manuscript-Advanced%20Materials-orange?style=flat-square)](#citation)
 
-The **computational pipeline** behind the manuscript *"Unveiling the Superiority of Ni-Whitlockite"* is a multi-scale screening workflow (molecular dynamics -> machine learning -> DFT) that identifies **nickel (Ni)** as the optimal metal substituent for high-hardness metal-substituted **whitlockite**, a bone-graft biomaterial.
+The **computational pipeline** behind the PAiCER manuscript identifies **nickel (Ni)** as the optimal divalent substituent for metal-substituted **whitlockite**, a calcium-phosphate bone-graft biomaterial. The screen runs molecular dynamics → a physics-based scoring function → an XGBoost extension over the full candidate library, and ranks **Ni at #1 with a Physics Score of 282.19**.
 
 > **Scientific question.** Which substituent M gives the best reinforcement profile in metal-substituted whitlockite?
-> **Hypothesis.** A d8 transition metal (Ni) maximizes strength through crystal-field stabilization energy (CFSE) and a structurally distorted lattice.
+> **Hypothesis.** A d8 transition metal (Ni) maximizes strength through crystal-field stabilization (CFSE) and a regular octahedral preference in a distorted lattice.
 
-*This repository contains the computational/ML pipeline, data, and result figures only. Experimental characterization (XRD / XPS / FTIR / nanoindentation) is reported in the manuscript and its Supporting Information.*
+*This repository contains the computational/ML pipeline, its input data, and reproduced result tables only. Experimental characterization (XRD / XPS / FTIR / nanoindentation) is reported in the manuscript and its Supporting Information.*
 
 ---
 
 ## Pipeline
 
 ```text
-Stage 1  MD screening (21 metals, GROMACS)             -> MSD, RDF, PMF, Lindemann, CN
-Stage 2  AI prediction (52 candidate elements, XGBoost)-> 5D Utopia ranking: 52 -> Top-12 -> 1 (Ni)
-Stage 3  DFT verification (Quantum ESPRESSO + LOBSTER) -> CFSE / electronic origin
+Stage 1  Physics-based score (21 metals, MD + theory)   -> Physics Score; Ni = 282.19 (Rank #1)
+Stage 2  XGBoost extension (full candidate library)     -> Physics Score predicted for every element
+Stage 3  Chemistry / biocompatibility / synthesis filter-> remove unviable candidates
+Stage 4  Hardness model (n = 4) + DFT verification      -> Ni > Co > Mg > Cu; CFSE / electronic origin
 ```
 
-## 2. MD screening (21 metals)
+## 2. Physics Score (21 metals)
 
-Large-scale GROMACS MD of 21 metal substituents at the M5 Wyckoff 6b site. Per-metal descriptors include **MSD** (dynamic stability), **RDF**, **PMF depth** (M-O binding), **Lindemann index**, and **CN_mean / CN_std** (local structural rigidity).
+`src/physics_score_21metals.py` computes the manuscript **Physics Score** for the 21 MD-screened metal-substituted whitlockites from MD- and theory-derived descriptors **only** (the four measured hardness values are read back at the very end solely to report a validation correlation; they are never used in scoring).
 
-- Ni shows the **lowest potential energy among screened divalent transition-metal candidates** and a deep PMF well (-14.25 kJ/mol).
-- Data: `data/md_potential_energy_21metals.csv`, `data/spatial_heterogeneity_21metals.csv`, `data/md_timepoint_scores_21metals.csv`, `data/pmf_results.csv`.
+The score is a weighted additive combination of:
 
-## 3. AI/ML 52-element screening
-
-**XGBoost** gradient-boosted-tree regressors (Chen & Guestrin, 2016) trained on the 21-metal MD data predict MSD / Lindemann / PMF for **52 candidate elements**, followed by **5D multi-objective ranking**:
-
-| axis | descriptor | objective |
+| group | descriptors | weight basis |
 |---|---|---|
-| Stability | MSD | min |
-| Structure | Lindemann | min |
-| Binding | PMF | min (deeper) |
-| Size fit | radius mismatch | min |
-| Geometry | OSSE (octahedral site stabilization) | max |
+| dynamic stability | MSD (50 ns, temporal stability, trend) | physical, fixed |
+| structural uniformity | Lindemann CV, coordination-number CV | physical, fixed |
+| bond strength | RDF peak height / width, time consistency | physical, fixed |
+| crystallinity | calculated XRD peak count | physical, fixed |
+| electronic / geometric | CFSE, ionic-radius match, Jahn-Teller penalty | ligand-field theory |
 
-The raw 5D Pareto frontier is broad: the XGBoost pipeline writes `outputs/pareto_5d_xgboost.csv`, where **38 metals are non-dominated** and the added `Dist` / `Rank` columns give Utopia-distance ordering. The manuscript-facing **Top-12 is the Utopia-distance Tier-1 selection**, not the full raw non-dominated set.
+Running it reproduces **Ni Physics Score = 282.1932 (Rank #1)** and a validation Pearson r = 0.855 against the four measured hardness values — matching the manuscript Table S1 (MD-data rows).
 
-The authoritative ranking is `data/final_ranking_5d.csv`, which matches the XGBoost script output `outputs/pareto_5d_xgboost.csv`. Its Top-12 is:
+## 3. XGBoost extension to the candidate library
 
-`Ni, Cr, V, Co, Cu, W, Eu, Ho, Dy, Tb, Tc, Au`
+`src/predict_45elements_xgboost.py` trains an **XGBoost** regressor (Chen & Guestrin, 2016) on the 21 Stage-1 Physics Scores using theoretical atomic descriptors as features, then predicts the Physics Score for every candidate element. **Ni remains Rank #1 (282.19);** CFSE is the dominant feature.
 
-Ni is **Rank #1**, and the leading 3d-metal Top-5 is **Ni, Cr, V, Co, Cu**. The XGBoost script `src/run_5d_pareto_xgboost.py` reproduces this ranking exactly.
+The authoritative reproduced ranking is `outputs/physics_ranking_45elements_xgboost.csv`.
 
-The Top-12 period distribution is period 4 (3d) = Ni, Cr, V, Co, Cu (5); period 5 (4d) = Tc (1); period 6 (5d/4f) = W, Eu, Ho, Dy, Tb, Au (6).
+> **Reproducibility note on the ML model.** The published Table S1 was produced with a gradient-boosted-tree regressor; this repository uses **XGBoost**, the algorithm named in the manuscript/SI. The 21 MD-data rows (including **Ni = 282.19**) are the Stage-1 Physics Scores and are therefore **model-independent and reproduce exactly**. Only the purely ML-extrapolated elements (those with no MD data) can shift by a small amount relative to the gradient-boosting values tabulated in the published SI. **Ni Rank #1 is unchanged.**
 
-Scientific disposition of the non-Ni Tier-1 candidates:
+## 4. Stage-3 chemistry / biocompatibility / synthesis filter
 
-| candidate(s) | disposition |
+The Physics-Score ranking is a physical-property screen; it does not encode chemical viability. Candidates ranked near the top but unsuitable for a divalent biomaterial substitution are removed on independent chemical grounds (this is the manuscript's Stage 3, not a column in the scoring code):
+
+| removed | reason |
 |---|---|
-| Cr, V, Co, Cu | Viable 3d M2+ candidates, but rank below Ni by Utopia distance. |
-| W | High-valence W(+6) chemistry creates charge imbalance in the divalent substitution site. |
-| Eu, Tb, Ho, Dy | Rare-earth +3 substitution weakens the lattice through charge-compensating defects. |
-| Tc | Radioactive; not viable for a biomaterial. |
-| Au | Noble-metal redox favors reduction to Au(0) rather than stable M2+ substitution. |
+| Ra, (radioactive) | not viable for a biomaterial |
+| Pb, Tl, Bi, Hg, Cd | toxic heavy metals |
+| Eu, Gd, Tb, Dy, Ho, Y, Yb, La… | rare-earth +3; charge-compensating defects weaken the divalent lattice |
+| Pt, Pd, Au, Ag, Rh, Ir… | noble-metal redox / cost; favor M(0) over stable M2+ |
 
-After Utopia-distance ranking and chemistry filtering, the winner is **Ni**.
+What survives as divalent, biocompatible, synthesizable candidates are 3d transition metals; among them **Ni is Rank #1**, and the manuscript synthesizes and characterizes **Ni, Co, Cu, Mg**.
 
-The separate hardness model uses n = 4 experimental hardness entries (Mg/Co/Ni/Cu). The robust reported claims, **CFSE-dominant importance = 0.96** and predicted ranking **Ni > Co > Mg > Cu**, come from the full-fit XGBoost model saved in `outputs/hardness_fullfit_importance_xgboost.csv`. The leave-one-out file `outputs/loocv_hardness_xgboost.csv` is retained as a transparent small-n diagnostic: with n = 4, its per-fold point predictions are statistically limited, its per-fold CFSE importance is approximately zero, and it should not be cited as evidence for CFSE dominance or ranking reproduction.
+## 5. Hardness model and DFT verification
 
-| ![5D Pareto](figures/final_5d_pareto.png) | ![Radar](figures/nature_radar_5d.png) |
-|:--:|:--:|
-| 5D Pareto / Utopia-distance selection (Ni highlighted) | 5D radar: why Ni |
-
-## 4. DFT verification
-
-Quantum ESPRESSO (PBE+U) + LOBSTER calculations address the electronic origin (CFSE / COHP). Ni's near-degenerate high/low-spin states cause charge sloshing and spin frustration, resolved with a 42-atom primitive cell and a two-step protocol (`nspin=1` relaxation -> `nspin=2` energy). See `docs/DFT_convergence_criteria.md`.
+- `src/run_loocv_hardness_xgboost.py` — the n = 4 hardness model (Mg/Co/Ni/Cu). The robust, reported results come from the **full-fit** XGBoost model (`outputs/hardness_fullfit_importance_xgboost.csv`): **CFSE-dominant importance** and predicted ranking **Ni > Co > Mg > Cu** (matching experiment). The leave-one-out file (`outputs/loocv_hardness_xgboost.csv`) is retained only as a transparent small-sample diagnostic — with n = 4 its per-fold point predictions are statistically limited and should **not** be cited as evidence for ranking or feature importance.
+- DFT: Quantum ESPRESSO (PBE+U) + LOBSTER address the electronic origin (CFSE / COHP). Ni's near-degenerate high/low-spin states are handled with a 42-atom primitive cell and a two-step protocol (`nspin=1` relaxation → `nspin=2` energy). See `docs/DFT_convergence_criteria.md`.
 
 ---
 
-## Reproduce the ML
+## Reproduce
 
 ```bash
 pip install -r requirements.txt
-python src/run_5d_pareto_xgboost.py
-python src/run_loocv_hardness_xgboost.py
+python src/physics_score_21metals.py        # Stage 1 -> outputs/physics_score_21metals.csv  (Ni = 282.1932)
+python src/predict_45elements_xgboost.py     # Stage 2 -> outputs/physics_ranking_45elements_xgboost.csv (Ni #1)
+python src/run_loocv_hardness_xgboost.py     # hardness model (full-fit + LOO diagnostic)
 ```
-
-## Reproducibility & provenance
-
-- `src/run_5d_pareto_xgboost.py` reads the MD descriptor CSVs in `data/` and writes `outputs/pareto_5d_xgboost.csv` with Pareto membership plus Utopia-distance `Dist` / `Rank` columns.
-- `src/run_loocv_hardness_xgboost.py` writes `outputs/loocv_hardness_xgboost.csv` and the full-fit feature-importance file `outputs/hardness_fullfit_importance_xgboost.csv`.
-- `data/final_ranking_5d.csv` is the authoritative XGBoost ranking used for the manuscript-facing Top-12 Utopia-distance selection.
-- `data/ai_prediction_raw_45elements.csv` is a historical filename; the file contains 52 candidate elements.
 
 ## Repository structure
 
 ```text
-src/        XGBoost ML pipeline (5D Pareto, LOOCV and full-fit hardness)
-data/       MD descriptors (21 metals), 52-element predictions, rankings, hardness (n=4)
-figures/    5D Pareto / radar / scree-plot result figures
-docs/       AI analysis & validation, DFT convergence, Pareto survivor analysis, data dictionary
-outputs/    reproduced result CSVs
+src/        physics-score pipeline (Stage 1), XGBoost extension (Stage 2), hardness model
+data/       MD descriptors (21 metals), calculated XRD peak counts, hardness (n=4)
+docs/       analysis & validation notes, DFT convergence, data dictionary, ranking dump
+outputs/    reproduced result tables
 ```
 
 ## Authors & Contributors
 
-- **Jung Heon Lee** - [@juhelee7](https://github.com/juhelee7) - supervision, corresponding author
-- **Jina Bae** - [@jinjin-del](https://github.com/jinjin-del) - experiments (synthesis & characterization)
-- **Byoungsang Lee** - [@carryer123](https://github.com/carryer123) - MD / DFT / ML computation (this repo)
+- **Jung Heon Lee** — [@juhelee7](https://github.com/juhelee7) — supervision, corresponding author
+- **Jina Bae** — [@jinjin-del](https://github.com/jinjin-del) — experiments (synthesis & characterization)
+- **Byoungsang Lee** — [@carryer123](https://github.com/carryer123) — MD / DFT / ML computation (this repo)
 
 See [`CONTRIBUTORS.md`](CONTRIBUTORS.md).
 
 ## Software
 
-GROMACS 2023.3; Quantum ESPRESSO 7.3.1; LOBSTER 5.1.0; XGBoost; scikit-learn; NumPy; pandas; matplotlib.
+GROMACS (MD); Quantum ESPRESSO 7.3.1 + LOBSTER 5.1.0 (DFT); XGBoost, NumPy, pandas (ML).
 
 ## Citation
 
-Manuscript: *"Unveiling the Superiority of Ni-Whitlockite"* (submitted to **Advanced Materials**).
+Manuscript: PAiCER (Bae *et al.*), submitted to **Advanced Materials**.
 ML method: Chen, T. & Guestrin, C. *XGBoost: A Scalable Tree Boosting System.* KDD 2016.

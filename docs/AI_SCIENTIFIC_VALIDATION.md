@@ -1,54 +1,44 @@
 # Scientific Validation of the AI-Driven Screen: Why Ni?
 
-This note explains why the conclusion **"Ni is the optimal substituent for whitlockite reinforcement (Rank #1)"** follows from systematic **multi-objective optimization** followed by **science-based elimination**.
+This note explains why the conclusion **"Ni is the optimal substituent for whitlockite reinforcement (Rank #1)"** follows from a physics-based score, an XGBoost extension, and science-based elimination — without using experimental hardness in the scoring.
 
 ---
 
-## The screening pipeline: 52 -> Top-12 -> 1
+## The pipeline: 21 metals → full library → Ni
 
-We performed an unbiased screen over **52 candidate elements**, without relying on intuition.
+### Step 1 — Physics Score (21 MD-screened metals)
 
-### Step 1 - AI prediction (52 candidate elements)
+`src/physics_score_21metals.py` combines MD descriptors (MSD, Lindemann CV, CN CV, RDF peak height/width, calculated XRD peaks) with theoretical atomic properties (CFSE, ionic-radius match, Jahn-Teller penalty) into a single **Physics Score**, using physically-fixed weights. No experimental hardness enters the scoring.
 
-Using the 21-metal MD results as training data, an XGBoost model predicts the properties (MSD, Lindemann, PMF) of all 52 candidate elements across the periodic table.
+- **Ni = 282.1932 — Rank #1.**
+- Read back at the end for validation only: **Pearson r = 0.855** vs the four measured hardness values.
 
-### Step 2 - 5D Pareto optimization and Utopia-distance selection
+### Step 2 — XGBoost extension to the candidate library
 
-Five orthogonal metrics are considered simultaneously: stability (MSD), structure (Lindemann), binding (PMF), size fit (radius mismatch), and geometry (OSSE).
+`src/predict_45elements_xgboost.py` trains XGBoost on the 21 Physics Scores (theoretical atomic descriptors as features) and predicts every candidate element. **Ni remains Rank #1; CFSE dominates feature importance.** Authoritative output: `outputs/physics_ranking_45elements_xgboost.csv`.
 
-The raw 5D Pareto frontier is large. In the XGBoost output `outputs/pareto_5d_xgboost.csv`, **38 metals are non-dominated**; the `Dist` and `Rank` columns then provide Utopia-distance ordering. The manuscript-facing **Top-12 is the Utopia-distance Tier-1 selection**, not the full raw Pareto set.
+The 21 MD-data scores (including Ni = 282.19) are model-independent and reproduce exactly; the ML-extrapolated tail uses XGBoost (manuscript algorithm) and can differ slightly from the published gradient-boosting Table S1. Ni #1 is unchanged.
 
-The authoritative ranking is `data/final_ranking_5d.csv`, which matches the XGBoost script output `outputs/pareto_5d_xgboost.csv`. Its Top-12 is:
-
-`Ni, Cr, V, Co, Cu, W, Eu, Ho, Dy, Tb, Tc, Au`
-
-Ni is **Rank #1**, and the leading 3d-metal Top-5 is **Ni, Cr, V, Co, Cu**. The XGBoost script `src/run_5d_pareto_xgboost.py` reproduces this ranking exactly.
-
-The Top-12 period distribution is period 4 (3d) = Ni, Cr, V, Co, Cu (5); period 5 (4d) = Tc (1); period 6 (5d/4f) = W, Eu, Ho, Dy, Tb, Au (6).
-
-### Step 3 - scientific elimination on the authoritative Top-12
-
-The elimination logic is applied only to the authoritative Top-12:
+### Step 3 — chemistry / biocompatibility / synthesis elimination
 
 | candidate(s) | disposition |
 |---|---|
-| Cr, V, Co, Cu | Viable 3d M2+ candidates, but rank below Ni by Utopia distance. |
-| W | High-valence W(+6) chemistry creates charge imbalance in the divalent substitution site. |
-| Eu, Tb, Ho, Dy | Rare-earth +3 substitution weakens the lattice through charge-compensating defects. |
-| Tc | Radioactive; not viable for a biomaterial. |
-| Au | Noble-metal redox favors reduction to Au(0) rather than stable M2+ substitution. |
+| Ra | radioactive — excluded |
+| Pb, Tl, Bi, Hg, Cd | toxic heavy metals — excluded |
+| Eu, Gd, Tb, Dy, Ho, Y, Yb, La | rare-earth +3; charge-compensating defects weaken the lattice |
+| Pt, Pd, Au, Ag, Rh, Ir | noble-metal redox / cost; favor M(0) over stable M2+ |
 
-### Step 4 - the winner
+### Step 4 — the winner
 
-Ni is the only candidate that is Rank #1 by Utopia distance and remains chemically viable after the Top-12 filters.
+Ni is Rank #1 by Physics Score and remains a viable, biocompatible, divalent, synthesizable candidate after the Stage-3 filters. The manuscript synthesizes **Ni, Co, Cu, Mg** for experimental comparison.
 
 ---
 
 ## Supporting computational evidence
 
-- **Geometric compatibility:** the conflict between the distorted M5 site and Ni's preference for a regular octahedron is the proposed reinforcement mechanism.
-- **Thermodynamic stability (MD):** Ni has the lowest potential energy among screened divalent transition-metal candidates and a deep PMF well (-14.25 kJ/mol).
-- **Hardness model:** full-fit XGBoost on the n = 4 hardness data gives CFSE-dominant importance (0.96) and predicted ranking Ni > Co > Mg > Cu. These claims come from `outputs/hardness_fullfit_importance_xgboost.csv`, not from the statistically limited leave-one-out point predictions in `outputs/loocv_hardness_xgboost.csv`.
+- **Geometric compatibility:** the conflict between the distorted M5 site and Ni's preference for a regular octahedron is the proposed reinforcement mechanism (Ni ionic radius 0.69 Å, closest match to the site).
+- **Thermodynamic stability (MD):** Ni has low MSD and high structural uniformity among divalent transition-metal candidates.
+- **Hardness model (n = 4):** full-fit XGBoost on the four measured metals gives **CFSE-dominant importance** and predicted ranking **Ni > Co > Mg > Cu** (matching experiment). These claims come from `outputs/hardness_fullfit_importance_xgboost.csv`, **not** from the statistically limited leave-one-out point predictions in `outputs/loocv_hardness_xgboost.csv`.
 - **Electronic origin (DFT):** Ni's near-degenerate high/low-spin states reflect electronic/structural flexibility; see `DFT_convergence_criteria.md`.
 
 The full experimental validation (XRD / XPS / FTIR / nanoindentation) is reported in the manuscript.

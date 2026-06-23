@@ -1,19 +1,38 @@
-Top-12 Utopia-distance Tier-1 selection (5D screen, XGBoost)
-S_* = per-axis normalized score (0..1, higher=better); Dist = Utopia-point distance (lower=better)
+Physics-Score ranking (XGBoost extension over the full candidate library)
+Score = manuscript Physics Score (0-300); Type = MD Data (Stage-1, model-independent) or ML Prediction (XGBoost extrapolation).
 
-Metal     MSD  Lindemann      PMF  Radius_Mismatch    OSSE  S_MSD  S_Lind  S_PMF  S_Rad  S_OSSE   Dist  Rank
-   Ni 47.7233     0.1023 -14.2436           0.0300 12.0000 0.3977  0.6181 0.7315 0.9605  1.0000 0.7631     1
-   Cr 46.5528     0.1579 -14.6113           0.0800 12.0000 0.4211  0.2580 0.7816 0.8947  1.0000 0.9718     2
-    V 42.4513     0.1579 -14.5510           0.0700  8.0000 0.5031  0.2580 0.7734 0.9079  0.6667 0.9841     3
-   Co 47.5221     0.0455 -10.4850           0.0300  8.0000 0.4017  0.9860 0.2193 0.9605  0.6667 1.0394     4
-   Cu 23.9027     0.1813 -14.0182           0.0100  6.0000 0.8740  0.1066 0.7008 0.9868  0.5000 1.0741     5
-    W 33.0394     0.1152 -13.7457           0.0600  0.0000 0.6913  0.5348 0.6636 0.9211  0.0000 1.1963     6
-   Eu 24.8617     0.1339 -15.2303           0.2300  0.0000 0.8548  0.4137 0.8659 0.6974  0.0000 1.2143     7
-   Ho 26.3644     0.1420 -15.8406           0.1800  0.0000 0.8248  0.3613 0.9491 0.7632  0.0000 1.2237     8
-   Dy 26.3644     0.1420 -15.8406           0.1900  0.0000 0.8248  0.3613 0.9491 0.7500  0.0000 1.2263     9
-   Tb 26.3644     0.1420 -15.8406           0.2000  0.0000 0.8248  0.3613 0.9491 0.7368  0.0000 1.2290    10
-   Tc 45.8354     0.1024 -13.5438           0.0700  0.0000 0.4354  0.6176 0.6361 0.9079  0.0000 1.2672    11
-   Au 23.9863     0.1089 -11.6521           0.1300  0.0000 0.8723  0.5755 0.3783 0.8289  0.0000 1.2697    12
+ Rank Metal      Score          Type
+    1    Ni 282.193200       MD Data
+    2    Eu 233.599410       MD Data
+    3    Cr 230.867754       MD Data
+    4    Pb 229.717544       MD Data
+    5    Pt 229.069672 ML Prediction
+    6    Ho 228.005890 ML Prediction
+    7    Dy 228.005890 ML Prediction
+    8    Tb 228.005890 ML Prediction
+    9    Gd 227.544861 ML Prediction
+   10     Y 220.683960 ML Prediction
+   11    Yb 218.680787       MD Data
+   12    Ag 211.198425 ML Prediction
+   13    Pd 210.654291       MD Data
+   14    Ba 209.663174       MD Data
+   15    Rh 209.564575 ML Prediction
+   16     W 209.232330 ML Prediction
+   17    Zn 209.017974       MD Data
+   18    Rb 208.510941 ML Prediction
+   19    Cs 208.510941 ML Prediction
+   20    Mo 207.061142 ML Prediction
 
-Top-12 metals: Ni, Cr, V, Co, Cu, W, Eu, Ho, Dy, Tb, Tc, Au
-Period distribution: period 4: 5, period 5: 1, period 6: 6
+Ni Rank #1, Physics Score 282.1932 (matches manuscript Table S1 MD-data value).
+Experimentally synthesized set (Ni, Co, Cu, Mg) ranks:
+  Ni: Rank #1  Score 282.19  [MD Data]
+  Co: Rank #41  Score 182.91  [MD Data]
+  Cu: Rank #42  Score 180.86  [MD Data]
+  Mg: Rank #60  Score 149.62  [MD Data]
+
+Higher-ranked non-synthesized candidates are removed at Stage 3 (chemistry/biocompatibility/synthesis):
+  rare-earth +3 (Eu, Gd, Tb, Dy, Ho, Y, Yb, La): charge-compensating defects weaken the divalent lattice
+  toxic heavy metals (Pb, Tl, Bi, Hg, Cd): not biocompatible
+  noble metals (Pt, Pd, Au, Ag, Rh, Ir): redox/cost, favor M(0) over stable M2+
+  radioactive (Ra): excluded
+=> among viable divalent biocompatible 3d candidates, Ni is Rank #1.

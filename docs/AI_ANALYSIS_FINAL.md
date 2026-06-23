@@ -1,74 +1,51 @@
-# AI/ML Screening - 5D Pareto and Utopia-Distance Analysis
+# AI/ML Screening — Physics Score and XGBoost Extension
 
-This note documents how the computational results in this repository form a predictive system for **rational materials design**. The 5D screen combines a theoretical descriptor (OSSE/CFSE-related octahedral stabilization) with MD-derived descriptors (PMF, MSD, Lindemann) to identify the optimal metal substituent for whitlockite.
-
----
-
-## 1. Methodology: a data-driven screen
-
-MD simulations of 21 metals provide the training data. XGBoost then predicts key descriptors for **52 candidate elements**, and the candidates are evaluated across five dimensions.
-
-### The five metrics (5D)
-
-1. **Stability** - MSD (dynamic stability; minimize)
-2. **Structure** - Lindemann index (structural rigidity; minimize)
-3. **Binding** - PMF, potential of mean force (M-O binding; minimize / deeper)
-4. **Size fit** - radius mismatch vs. Mg (geometric compatibility; minimize)
-5. **Geometry** - OSSE, octahedral site stabilization energy (octahedral preference; maximize)
+This note documents how the computational results in this repository form a predictive system for **rational materials design**, and how they identify **Ni** as the optimal divalent substituent for whitlockite.
 
 ---
 
-## 2. Pareto optimization and Utopia-distance selection
+## 1. Methodology: a physics-based, data-driven screen
 
-### 2.1 Raw frontier vs. Tier-1 selection
+Molecular-dynamics simulations of 21 metal-substituted whitlockites provide the training data. A **physics-based scoring function** (Stage 1) converts MD- and theory-derived descriptors into a single **Physics Score** per metal, with weights fixed from physical reasoning — **not** fit to experimental data. An **XGBoost** regressor (Stage 2) then extends the Physics Score to the full candidate library.
 
-The raw 5D Pareto frontier is intentionally permissive and large. In `outputs/pareto_5d_xgboost.csv`, **38 metals are non-dominated**. The same output includes `Dist` and `Rank` columns, which rank candidates by distance from the ideal Utopia point.
+### Descriptor groups feeding the Physics Score
 
-The manuscript-facing **Top-12 is the Utopia-distance Tier-1 selection**, not the raw non-dominated set. The authoritative ranking is `data/final_ranking_5d.csv`, which matches the XGBoost script output `outputs/pareto_5d_xgboost.csv`.
-
-### 2.2 Authoritative Top-12
-
-The authoritative Top-12 Utopia-distance ranking is:
-
-1. **Ni**
-2. **Cr**
-3. **V**
-4. **Co**
-5. **Cu**
-6. **W**
-7. **Eu**
-8. **Ho**
-9. **Dy**
-10. **Tb**
-11. **Tc**
-12. **Au**
-
-Ni is **Rank #1**, and the leading 3d-metal Top-5 is **Ni, Cr, V, Co, Cu**.
-
-### 2.3 Period distribution
-
-| Period | Elements (count) | Character |
-|---|---|---|
-| **4 (3d)** | **Ni, Cr, V, Co, Cu (5)** | Leading Utopia-distance Top-5; light and geometrically compatible. |
-| **5 (4d)** | Tc (1) | Tc is radioactive. |
-| **6 (5d/4f)** | W, Eu, Ho, Dy, Tb, Au (6) | Heavy elements with useful predicted descriptors but chemical viability limits. |
-
-**Takeaway:** the 3d transition-metal candidates occupy the Top-5, and Ni is the best-balanced candidate by Utopia distance.
+1. **Dynamic stability** — MSD at 50 ns, MSD temporal stability, MSD trend
+2. **Structural uniformity** — Lindemann CV, coordination-number CV
+3. **Bond strength** — RDF peak height / width, score time-consistency
+4. **Crystallinity** — calculated XRD peak count (fewer = more crystalline)
+5. **Electronic / geometric** — CFSE, ionic-radius match to the site, Jahn-Teller penalty (d9)
 
 ---
 
-## 3. Final ranking and chemistry filters
+## 2. Stage 1 — Physics Score (21 metals)
 
-The XGBoost pipeline `src/run_5d_pareto_xgboost.py` reproduces `data/final_ranking_5d.csv` exactly, including Ni Rank #1 and the 3d Top-5 (Ni, Cr, V, Co, Cu).
+`src/physics_score_21metals.py` reproduces the authoritative Physics Score:
 
-One-line disposition of each non-Ni authoritative Top-12 candidate:
+- **Ni = 282.1932 — Rank #1.**
+- Validation against the four measured hardness values (Mg/Co/Ni/Cu, used **only** at this final step): **Pearson r = 0.855**.
+
+These 21 values are the authoritative `outputs/physics_score_21metals.csv` and match the MD-data rows of manuscript Table S1.
+
+## 3. Stage 2 — XGBoost extension
+
+`src/predict_45elements_xgboost.py` trains XGBoost on the 21 Physics Scores using theoretical atomic descriptors, then predicts every candidate element (`outputs/physics_ranking_45elements_xgboost.csv`). **Ni stays Rank #1 (282.19); CFSE is the dominant feature** (importance ≈ 0.5).
+
+**Model note.** The 21 MD-data scores (including Ni = 282.19) are Stage-1 values and reproduce exactly under any regressor. The published Table S1 used gradient boosting; this repository uses XGBoost (the algorithm named in the manuscript), so the purely ML-extrapolated elements can differ slightly from the SI numbers. Ni Rank #1 is unchanged.
+
+## 4. Stage 3 — chemistry / biocompatibility / synthesis filter
+
+The Physics Score is a physical-property screen and does not encode chemical viability. Top-ranked but unviable candidates are removed on independent grounds:
 
 | candidate(s) | disposition |
 |---|---|
-| Cr, V, Co, Cu | Viable 3d M2+ candidates, but rank below Ni by Utopia distance. |
-| W | High-valence W(+6) chemistry creates charge imbalance in the divalent substitution site. |
-| Eu, Tb, Ho, Dy | Rare-earth +3 substitution weakens the lattice through charge-compensating defects. |
-| Tc | Radioactive; not viable for a biomaterial. |
-| Au | Noble-metal redox favors reduction to Au(0) rather than stable M2+ substitution. |
+| Ra | radioactive — excluded |
+| Pb, Tl, Bi, Hg, Cd | toxic heavy metals — excluded |
+| Eu, Gd, Tb, Dy, Ho, Y, Yb, La (rare earths) | +3 substitution introduces charge-compensating defects that weaken the divalent lattice |
+| Pt, Pd, Au, Ag, Rh, Ir (noble) | redox / cost; favor M(0) over stable M2+ |
 
-**Conclusion:** the 5D Utopia-distance ranking and chemistry filters identify **Ni as the optimal substituent**. Experimental validation is reported in the manuscript and its Supporting Information.
+The viable, biocompatible, synthesizable survivors are 3d transition metals; **Ni is Rank #1** among them. The manuscript synthesizes and characterizes **Ni, Co, Cu, Mg**.
+
+## 5. Conclusion
+
+The Physics-Score ranking (Ni #1), the XGBoost extension (Ni #1), and the Stage-3 chemistry filter together identify **Ni as the optimal substituent**. The hardness model and DFT (Sections in the README) give the mechanistic, CFSE-based explanation. Experimental validation is reported in the manuscript and its Supporting Information.

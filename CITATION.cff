@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this repository, please cite the associated manuscript and software record."
-title: "Ni-Whitlockite computational screening (MD -> XGBoost 5D Pareto -> DFT)"
+title: "Ni-Whitlockite computational screening (MD -> Physics Score -> XGBoost -> DFT)"
 version: 1.0.0
 date-released: 2026-06-23
 license: MIT
@@ -12,7 +12,7 @@ authors:
     given-names: Jina
   - family-names: Lee
     given-names: Byoungsang
-notes: "Associated manuscript: Unveiling the Superiority of Ni-Whitlockite (submitted to Advanced Materials)."
+notes: "Associated manuscript: PAiCER (Bae et al.), submitted to Advanced Materials."
 references:
   - type: conference-paper
     title: "XGBoost: A Scalable Tree Boosting System"

@@ -1,0 +1,5 @@
+Metal,actual_MPa,LOO_pred_MPa,error_pct,CFSE_importance
+Mg,320.0,380.0,18.7,0.0
+Co,380.0,320.0,-15.8,0.0
+Ni,467.5,280.0,-40.1,0.0
+Cu,280.0,467.5,67.0,0.0

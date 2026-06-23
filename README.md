@@ -6,7 +6,7 @@
 [![DFT](https://img.shields.io/badge/DFT-Quantum%20ESPRESSO%20%2B%20LOBSTER-blue?style=flat-square)](#5-dft-verification)
 [![Paper](https://img.shields.io/badge/manuscript-Advanced%20Materials-orange?style=flat-square)](#citation)
 
-The **computational pipeline** behind the PAiCER manuscript identifies **nickel (Ni)** as the optimal divalent substituent for metal-substituted **whitlockite**, a calcium-phosphate bone-graft biomaterial. The screen runs molecular dynamics → a physics-based scoring function → an XGBoost extension over the full candidate library, and ranks **Ni at #1 with a Physics Score of 282.19**.
+The **computational pipeline** behind the PAiCER manuscript ranks **nickel (Ni)** as the **top divalent substituent** for metal-substituted **whitlockite** (a calcium-phosphate bone-graft biomaterial) — Rank #1 by this computational screen after the stated chemical filters. (The experimental confirmation that Ni is optimal is reported in the manuscript, not in this repository.) The screen runs molecular dynamics → a physics-based scoring function → an XGBoost extension over the full candidate library, and ranks **Ni at #1 with a Physics Score of 282.19**.
 
 > **Scientific question.** Which substituent M gives the best reinforcement profile in metal-substituted whitlockite?
 > **Hypothesis.** A d8 transition metal (Ni) maximizes strength through crystal-field stabilization (CFSE) and a regular octahedral preference in a distorted lattice.
@@ -42,9 +42,9 @@ Running it reproduces **Ni Physics Score = 282.1932 (Rank #1)** and a validation
 
 ## 3. XGBoost extension to the candidate library
 
-`src/predict_45elements_xgboost.py` trains an **XGBoost** regressor (Chen & Guestrin, 2016) on the 21 Stage-1 Physics Scores using theoretical atomic descriptors as features, then predicts the Physics Score for every candidate element. **Ni remains Rank #1 (282.19);** CFSE is the dominant feature.
+`src/predict_candidates_xgboost.py` trains an **XGBoost** regressor (Chen & Guestrin, 2016) on the 21 Stage-1 Physics Scores using theoretical atomic descriptors as features, then predicts the Physics Score for every candidate element. **Ni remains Rank #1 (282.19);** CFSE is the dominant feature. (The candidate library spans **62 elements** across the periodic table; the manuscript Table S1 reports the **45 divalent-relevant** candidates — Ni is Rank #1 in both.)
 
-The authoritative reproduced ranking is `outputs/physics_ranking_45elements_xgboost.csv` (manuscript Table S1).
+The authoritative reproduced ranking is `outputs/physics_ranking_xgboost.csv` (manuscript Table S1).
 
 > **Note.** The ranking uses XGBoost (Chen & Guestrin, 2016), the algorithm named in the manuscript. The Stage-1 Physics Scores for the 21 MD-screened metals — including **Ni = 282.19 (Rank #1)** — are model-independent and reproduce exactly.
 
@@ -63,7 +63,7 @@ What survives as divalent, biocompatible, synthesizable candidates are 3d transi
 
 ## 5. Hardness model and DFT verification
 
-- `src/run_loocv_hardness_xgboost.py` — the n = 4 hardness model (Mg/Co/Ni/Cu). The robust, reported results come from the **full-fit** XGBoost model (`outputs/hardness_fullfit_importance_xgboost.csv`): **CFSE-dominant importance** and predicted ranking **Ni > Co > Mg > Cu** (matching experiment). The leave-one-out file (`outputs/loocv_hardness_xgboost.csv`) is retained only as a transparent small-sample diagnostic — with n = 4 its per-fold point predictions are statistically limited and should **not** be cited as evidence for ranking or feature importance.
+- `src/run_loocv_hardness_xgboost.py` — an **exploratory n = 4** hardness model (Mg/Co/Ni/Cu). The full-fit XGBoost model (`outputs/hardness_fullfit_importance_xgboost.csv`) shows **CFSE as the dominant descriptor** and reproduces the experimental order **Ni > Co > Mg > Cu** *in-sample*. With only n = 4 this is a diagnostic, **not** a validated predictor: the leave-one-out file (`outputs/loocv_hardness_xgboost.csv`) is retained transparently and its per-fold point predictions should **not** be cited as evidence for ranking or feature importance.
 - DFT: Quantum ESPRESSO (PBE+U) + LOBSTER address the electronic origin (CFSE / COHP). Ni's near-degenerate high/low-spin states are handled with a 42-atom primitive cell and a two-step protocol (`nspin=1` relaxation → `nspin=2` energy). See `docs/DFT_convergence_criteria.md`.
 
 ---
@@ -73,7 +73,7 @@ What survives as divalent, biocompatible, synthesizable candidates are 3d transi
 ```bash
 pip install -r requirements.txt
 python src/physics_score_21metals.py        # Stage 1 -> outputs/physics_score_21metals.csv  (Ni = 282.1932)
-python src/predict_45elements_xgboost.py     # Stage 2 -> outputs/physics_ranking_45elements_xgboost.csv (Ni #1)
+python src/predict_candidates_xgboost.py     # Stage 2 -> outputs/physics_ranking_xgboost.csv (Ni #1)
 python src/run_loocv_hardness_xgboost.py     # hardness model (full-fit + LOO diagnostic)
 ```
 

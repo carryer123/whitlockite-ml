@@ -1,6 +1,6 @@
 # Scientific Validation of the AI-Driven Screen: Why Ni?
 
-This note explains why the conclusion **"Ni is the optimal substituent for whitlockite reinforcement (Rank #1)"** follows from a physics-based score, an XGBoost extension, and science-based elimination — without using experimental hardness in the scoring.
+This note explains why **Ni is the top-ranked substituent for whitlockite reinforcement (Rank #1)** in this computational screen — from a physics-based score, an XGBoost extension, and science-based elimination, without using experimental hardness in the scoring. (The experimental confirmation that Ni is optimal is reported in the manuscript.)
 
 ---
 
@@ -15,7 +15,7 @@ This note explains why the conclusion **"Ni is the optimal substituent for whitl
 
 ### Step 2 — XGBoost extension to the candidate library
 
-`src/predict_45elements_xgboost.py` trains XGBoost on the 21 Physics Scores (theoretical atomic descriptors as features) and predicts every candidate element. **Ni remains Rank #1; CFSE dominates feature importance.** Authoritative output: `outputs/physics_ranking_45elements_xgboost.csv`.
+`src/predict_candidates_xgboost.py` trains XGBoost on the 21 Physics Scores (theoretical atomic descriptors as features) and predicts every candidate element. **Ni remains Rank #1; CFSE dominates feature importance.** Authoritative output: `outputs/physics_ranking_xgboost.csv`.
 
 The ranking uses XGBoost (the algorithm named in the manuscript); the 21 MD-data scores (including Ni = 282.19) are model-independent and reproduce exactly.
 
@@ -37,8 +37,8 @@ Ni is Rank #1 by Physics Score and remains a viable, biocompatible, divalent, sy
 ## Supporting computational evidence
 
 - **Geometric compatibility:** the conflict between the distorted M5 site and Ni's preference for a regular octahedron is the proposed reinforcement mechanism (Ni ionic radius 0.69 Å, closest match to the site).
-- **Thermodynamic stability (MD):** Ni has low MSD and high structural uniformity among divalent transition-metal candidates.
-- **Hardness model (n = 4):** full-fit XGBoost on the four measured metals gives **CFSE-dominant importance** and predicted ranking **Ni > Co > Mg > Cu** (matching experiment). These claims come from `outputs/hardness_fullfit_importance_xgboost.csv`, **not** from the statistically limited leave-one-out point predictions in `outputs/loocv_hardness_xgboost.csv`.
+- **Stability / structure (MD):** Ni's Physics Score is dominated by strong structural-uniformity (Lindemann/CN) and electronic (CFSE) contributions; see the per-descriptor weights in `src/physics_score_21metals.py`.
+- **Hardness model (n = 4, exploratory):** an in-sample fit only. The full-fit XGBoost shows **CFSE as the dominant descriptor** and reproduces the experimental order **Ni > Co > Mg > Cu** *in-sample* (`outputs/hardness_fullfit_importance_xgboost.csv`). With n = 4 this is a diagnostic, not a validated predictor; the leave-one-out point predictions in `outputs/loocv_hardness_xgboost.csv` are **not** used as evidence for ranking.
 - **Electronic origin (DFT):** Ni's near-degenerate high/low-spin states reflect electronic/structural flexibility; see `DFT_convergence_criteria.md`.
 
 The full experimental validation (XRD / XPS / FTIR / nanoindentation) is reported in the manuscript.

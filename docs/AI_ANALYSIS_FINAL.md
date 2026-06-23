@@ -1,6 +1,6 @@
 # AI/ML Screening — Physics Score and XGBoost Extension
 
-This note documents how the computational results in this repository form a predictive system for **rational materials design**, and how they identify **Ni** as the optimal divalent substituent for whitlockite.
+This note documents how the computational results in this repository form a predictive system for **rational materials design**, and how they rank **Ni** as the top divalent substituent for whitlockite (Rank #1 by the computational screen; the experimental confirmation of optimality is in the manuscript).
 
 ---
 
@@ -29,7 +29,7 @@ These 21 values are the authoritative `outputs/physics_score_21metals.csv` and m
 
 ## 3. Stage 2 — XGBoost extension
 
-`src/predict_45elements_xgboost.py` trains XGBoost on the 21 Physics Scores using theoretical atomic descriptors, then predicts every candidate element (`outputs/physics_ranking_45elements_xgboost.csv`). **Ni stays Rank #1 (282.19); CFSE is the dominant feature** (importance ≈ 0.5).
+`src/predict_candidates_xgboost.py` trains XGBoost on the 21 Physics Scores using theoretical atomic descriptors, then predicts every candidate element (`outputs/physics_ranking_xgboost.csv`). **Ni stays Rank #1 (282.19); CFSE is the dominant feature** (importance ≈ 0.5).
 
 **Model note.** The ranking uses XGBoost (Chen & Guestrin, 2016), the algorithm named in the manuscript. The 21 MD-data scores (including Ni = 282.19) are Stage-1 values and reproduce exactly.
 
@@ -48,4 +48,4 @@ The viable, biocompatible, synthesizable survivors are 3d transition metals; **N
 
 ## 5. Conclusion
 
-The Physics-Score ranking (Ni #1), the XGBoost extension (Ni #1), and the Stage-3 chemistry filter together identify **Ni as the optimal substituent**. The hardness model and DFT (Sections in the README) give the mechanistic, CFSE-based explanation. Experimental validation is reported in the manuscript and its Supporting Information.
+The Physics-Score ranking (Ni #1), the XGBoost extension (Ni #1), and the Stage-3 chemistry filter together make **Ni the top-ranked viable substituent** in this computational screen. The hardness model and DFT (Sections in the README) give the mechanistic, CFSE-based rationale. The experimental confirmation that Ni is optimal is reported in the manuscript and its Supporting Information.

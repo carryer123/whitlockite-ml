@@ -41,7 +41,7 @@ loo = pd.DataFrame(rows)
 loo.to_csv(os.path.join(OUT, "loocv_hardness_xgboost.csv"), index=False)
 print(loo.to_string(index=False))
 
-# ---- Full-fit: feature importance + ranking (the robust, reported result) ----
+# ---- Full-fit: feature importance + ranking (exploratory, in-sample only) ----
 full = XGBRegressor(**XGB_PARAMS).fit(X, y)
 imp = sorted(zip(feat, full.feature_importances_), key=lambda z: -z[1])
 pd.DataFrame(imp, columns=["feature", "importance"]).to_csv(
@@ -51,8 +51,8 @@ pred_full = {m: float(full.predict(X[i:i+1])[0]) for i, m in enumerate(metals)}
 rank = sorted(metals, key=lambda m: -pred_full[m])
 print(f"Predicted hardness ranking (XGBoost full-fit): {' > '.join(rank)}")
 print(f"Experimental ranking:                          Ni > Co > Mg > Cu")
-print(f"\nNOTE: with n=4 the LOO point predictions are statistically limited (see"
-      f"\nloocv_hardness_xgboost.csv). The robust, reported conclusions come from the"
-      f"\nFULL-FIT model: (i) CFSE dominates feature importance and (ii) the predicted"
-      f"\nranking reproduces the experimental order Ni > Co > Mg > Cu.")
+print(f"\nNOTE: with n=4 this hardness model is EXPLORATORY / in-sample only. The LOO point"
+      f"\npredictions (loocv_hardness_xgboost.csv) are statistically limited and are NOT used as"
+      f"\nevidence for ranking. The full-fit model is reported only as a diagnostic: (i) CFSE is the"
+      f"\ndominant descriptor and (ii) the in-sample ranking matches the experimental order Ni > Co > Mg > Cu.")
 print(f"Saved: loocv_hardness_xgboost.csv, hardness_fullfit_importance_xgboost.csv")

@@ -11,7 +11,7 @@ Model: XGBoost (Chen & Guestrin, 2016), the algorithm named in the manuscript.
 The 21 MD-data rows (including Ni = 282.19) are the Stage-1 Physics Scores and are
 model-independent, so they reproduce exactly.
 
-Run from the repository root:  python src/predict_45elements_xgboost.py
+Run from the repository root:  python src/predict_candidates_xgboost.py
 """
 import os
 import numpy as np
@@ -124,7 +124,7 @@ for m, p in atomic_data.items():
         rows.append({'Metal': m, 'Score': float(model.predict(np.array([vec(p)]))[0]), 'Type': 'ML Prediction', 'Experimental': np.nan})
 df = pd.DataFrame(rows).sort_values('Score', ascending=False).reset_index(drop=True)
 df['Rank'] = np.arange(1, len(df) + 1)
-df.to_csv(os.path.join(OUT, "physics_ranking_45elements_xgboost.csv"), index=False)
+df.to_csv(os.path.join(OUT, "physics_ranking_xgboost.csv"), index=False)
 
 # ----------------------------------------------------------------------------
 # 5. Report
@@ -135,4 +135,4 @@ print(f"\nCandidates ranked: {len(df)}")
 print(df.head(12).to_string(index=False))
 ni = df[df.Metal == 'Ni'].iloc[0]
 print(f"\nNi Rank #{int(ni.Rank)}  |  Physics Score {ni.Score:.4f}  (Table S1: #1, 282.1932)")
-print("Saved: outputs/physics_ranking_45elements_xgboost.csv")
+print("Saved: outputs/physics_ranking_xgboost.csv")

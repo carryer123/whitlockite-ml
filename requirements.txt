@@ -1,4 +1,4 @@
-# Tested on Python 3.12.
-xgboost>=2.0
-numpy>=1.24
-pandas>=2.0
+# Tested on Python 3.12.6. Pinned to the versions used to generate outputs/.
+xgboost==3.3.0
+numpy==2.1.1
+pandas==2.3.0

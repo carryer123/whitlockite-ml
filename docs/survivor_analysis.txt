@@ -1,4 +1,4 @@
-Top 12 Pareto survivors (5D screen)
+Top 12 Utopia-distance Tier-1 selection (5D screen)
 S_* = per-axis normalized score (0..1, higher = better); Dist = Utopia-point distance (lower = better)
 
   Metal      MSD   Lindemann      PMF   Radius_Mismatch  OSSE     S_MSD   S_Lind    S_PMF    S_Rad   S_OSSE     Dist  Rank

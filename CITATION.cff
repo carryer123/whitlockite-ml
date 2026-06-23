@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the associated manuscript and software record."
+title: "Ni-Whitlockite computational screening (MD -> XGBoost 5D Pareto -> DFT)"
+version: 1.0.0
+date-released: 2026-06-23
+license: MIT
+repository-code: "https://github.com/carryer123/whitlockite-ml"
+authors:
+  - family-names: Lee
+    given-names: Jung Heon
+  - family-names: Bae
+    given-names: Jina
+  - family-names: Lee
+    given-names: Byoungsang
+notes: "Associated manuscript: Unveiling the Superiority of Ni-Whitlockite (submitted to Advanced Materials)."
+references:
+  - type: conference-paper
+    title: "XGBoost: A Scalable Tree Boosting System"
+    authors:
+      - family-names: Chen
+        given-names: Tianqi
+      - family-names: Guestrin
+        given-names: Carlos
+    year: 2016
+    conference: "Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining"
+    doi: "10.1145/2939672.2939785"

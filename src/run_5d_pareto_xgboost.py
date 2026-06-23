@@ -119,11 +119,24 @@ df_res["Is_Pareto"] = False
 df_res.loc[df_res.index[pareto], "Is_Pareto"] = True
 
 pareto_metals = df_res[df_res["Is_Pareto"]]["Metal"].tolist()
+
+# ----------------------------------------------------------------------------
+# 6. Utopia-distance ranking (Tier-1 selection among the non-dominated set)
+#    Utopia point = all normalized scores at 1.0; rank by Euclidean distance.
+# ----------------------------------------------------------------------------
+for col, s in [("S_MSD","S_MSD"),("S_Lind","S_Lind"),("S_PMF","S_PMF"),("S_Rad","S_Rad"),("S_OSSE","S_OSSE")]:
+    df_res[col] = dn[s].values
+df_res["Dist"] = np.sqrt(((1.0 - dn[["S_MSD","S_Lind","S_PMF","S_Rad","S_OSSE"]].values) ** 2).sum(axis=1))
+df_res = df_res.sort_values("Dist").reset_index(drop=True)
+df_res["Rank"] = np.arange(1, len(df_res) + 1)
 df_res.to_csv(os.path.join(OUT, "pareto_5d_xgboost.csv"), index=False)
 
+top12 = df_res.head(12)["Metal"].tolist()
 print("\nXGBoost feature importance (MSD model):",
       dict(zip(["Z","r_ion","mass","EN","polar","OSSE"],
                np.round(model_msd.feature_importances_, 3))))
-print(f"5D Pareto frontier (XGBoost): {pareto_metals}")
-print(f"Ni on Pareto frontier? {'YES' if 'Ni' in pareto_metals else 'NO'}")
+print(f"Candidates screened: {len(df_res)}")
+print(f"Non-dominated (raw 5D Pareto): {len(pareto_metals)} metals")
+print(f"Top-12 by Utopia distance:    {top12}")
+print(f"Rank #1: {df_res.iloc[0]['Metal']}   |   Ni in Top-12? {'YES' if 'Ni' in top12 else 'NO'}")
 print(f"Saved: {os.path.join(OUT, 'pareto_5d_xgboost.csv')}")

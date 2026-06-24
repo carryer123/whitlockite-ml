@@ -11,7 +11,6 @@ This note explains why **Ni is the top-ranked substituent for whitlockite reinfo
 `src/physics_score_21metals.py` combines MD descriptors (MSD, Lindemann CV, CN CV, RDF peak height/width, calculated XRD peaks) with theoretical atomic properties (CFSE, ionic-radius match, Jahn-Teller penalty) into a single **Physics Score**, using physically-fixed weights. No experimental hardness enters the scoring.
 
 - **Ni = 282.1932 — Rank #1.**
-- Read back at the end for validation only: **Pearson r = 0.855** vs the four measured hardness values.
 
 ### Step 2 — XGBoost extension to the candidate library
 

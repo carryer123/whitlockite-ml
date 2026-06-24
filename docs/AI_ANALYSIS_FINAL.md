@@ -23,9 +23,8 @@ Molecular-dynamics simulations of 21 metal-substituted whitlockites provide the 
 `src/physics_score_21metals.py` reproduces the authoritative Physics Score:
 
 - **Ni = 282.1932 — Rank #1.**
-- Validation against the four measured hardness values (Mg/Co/Ni/Cu, used **only** at this final step): **Pearson r = 0.855**.
 
-These 21 values are the authoritative `outputs/physics_score_21metals.csv` and match the MD-data rows of manuscript Table S1.
+These 21 values are the authoritative `outputs/physics_score_21metals.csv` and match the MD-data rows of manuscript Table S1. No experimental hardness is used; experimental nanoindentation is reported in the manuscript as independent validation only.
 
 ## 3. Stage 2 — XGBoost extension
 

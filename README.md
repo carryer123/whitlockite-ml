@@ -27,7 +27,7 @@ The screen is **two-layer** (PAiCER SI): Layer 1 is a broad physics-only Physics
 
 ## 2. Physics Score (21 metals)
 
-`src/physics_score_21metals.py` computes the manuscript **Physics Score** for the 21 MD-screened metal-substituted whitlockites from MD- and theory-derived descriptors **only** (the four measured hardness values are read back at the very end solely to report a validation correlation; they are never used in scoring).
+`src/physics_score_21metals.py` computes the manuscript **Physics Score** for the 21 MD-screened metal-substituted whitlockites from MD- and theory-derived descriptors **only**. No experimental data is used.
 
 The score is a weighted additive combination of:
 

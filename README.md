@@ -18,11 +18,12 @@ The **computational pipeline** behind the PAiCER manuscript ranks **nickel (Ni)*
 ## Pipeline
 
 ```text
-Stage 1  Physics-based score (21 metals, MD + theory)   -> Physics Score; Ni = 282.19 (Rank #1)
-Stage 2  XGBoost extension (full candidate library)     -> Physics Score predicted for every element
-Stage 3  Chemistry / biocompatibility / synthesis filter-> remove unviable candidates
-Stage 4  Hardness model (n = 4) + DFT verification      -> Ni > Co > Mg > Cu; CFSE / electronic origin
+Layer 1  Physics Score (21 metals, MD+theory) + XGBoost to 45 elems -> Table S1; Ni = 282.19 (Rank #1)
+Layer 2  Weighted ranking of the 21 candidates (biocompatibility 20%) -> Table S2; Ni = 97.29 (Rank #1)
+Verify   DFT (Ni Jahn-Teller-inactivity) + n=4 hardness diagnostic    -> CFSE / electronic origin; Ni > Co > Mg > Cu
 ```
+
+The screen is **two-layer** (PAiCER SI): Layer 1 is a broad physics-only Physics Score over a 5D Pareto front (Table S1, 0-300); Layer 2 is the biomaterial-facing **weighted multi-objective ranking** of the Pareto-viable candidates that adds **LD50/IC50 biocompatibility** as an explicit objective (Table S2, 0-100). Ni is Rank #1 in both.
 
 ## 2. Physics Score (21 metals)
 
@@ -48,18 +49,19 @@ The authoritative reproduced ranking is `outputs/physics_ranking_xgboost.csv` (m
 
 > **Note.** The ranking uses XGBoost (Chen & Guestrin, 2016), the algorithm named in the manuscript. The Stage-1 Physics Scores for the 21 MD-screened metals — including **Ni = 282.19 (Rank #1)** — are model-independent and reproduce exactly.
 
-## 4. Stage-3 chemistry / biocompatibility / synthesis filter
+## 4. Table S2 — weighted multi-objective ranking (Layer 2)
 
-The Physics-Score ranking is a physical-property screen; it does not encode chemical viability. Candidates ranked near the top but unsuitable for a divalent biomaterial substitution are removed on independent chemical grounds (this is the manuscript's Stage 3, not a column in the scoring code):
+`src/physics_score_S2_21candidates.py` ranks the 21 Pareto-viable candidates by a **weighted sum of five normalized objectives** — the manuscript's biomaterial-facing final ranking (Fig. 1):
 
-| removed | reason |
-|---|---|
-| Ra, (radioactive) | not viable for a biomaterial |
-| Pb, Tl, Bi, Hg, Cd | toxic heavy metals |
-| Eu, Gd, Tb, Dy, Ho, Y, Yb, La… | rare-earth +3; charge-compensating defects weaken the divalent lattice |
-| Pt, Pd, Au, Ag, Rh, Ir… | noble-metal redox / cost; favor M(0) over stable M2+ |
+| objective | weight | direction |
+|---|---|---|
+| Hardness | 40 | higher better (min-max) |
+| CFSE | 30 | higher better |
+| **Biocompatibility** (LD50/IC50) | **20** | lower toxicity better (inverted) |
+| Lindemann CV | 5 | lower better (inverted) |
+| dUtopia | 5 | pre-normalized Pareto-utopia distance |
 
-What survives as divalent, biocompatible, synthesizable candidates are 3d transition metals; among them **Ni is Rank #1**, and the manuscript synthesizes and characterizes **Ni, Co, Cu, Mg**.
+This is where **biocompatibility enters as an explicit 20% objective**, so physically-strong but unsafe candidates (e.g. Pb, Ra, Ba) fall in the ranking. The per-element objective values are the published PAiCER SI Table S2 values (`data/objectives_21candidates.csv`). Running the script reproduces **Ni = 97.2881 (Rank #1)** and matches all 21 published Weighted sums to within 1e-3 (`expected/TableS2_21.csv`). The manuscript synthesizes and characterizes the top-ranked viable set **Ni, Co, Cu, Mg**.
 
 ## 5. Hardness model and DFT verification
 
@@ -72,17 +74,21 @@ What survives as divalent, biocompatible, synthesizable candidates are 3d transi
 
 ```bash
 pip install -r requirements.txt
-python src/physics_score_21metals.py        # Stage 1 -> outputs/physics_score_21metals.csv  (Ni = 282.1932)
-python src/predict_candidates_xgboost.py     # Stage 2 -> outputs/physics_ranking_xgboost.csv (Ni #1)
-python src/run_loocv_hardness_xgboost.py     # hardness model (full-fit + LOO diagnostic)
+python src/physics_score_21metals.py          # Layer 1 -> outputs/physics_score_21metals.csv  (Ni = 282.1932)
+python src/predict_candidates_xgboost.py       # Layer 1 -> outputs/physics_ranking_xgboost.csv (Table S1, Ni #1)
+python src/physics_score_S2_21candidates.py    # Layer 2 -> outputs/physics_score_S2_21candidates.csv (Table S2, Ni = 97.2881)
+python src/run_loocv_hardness_xgboost.py       # hardness model (full-fit + LOO diagnostic)
 ```
+
+`expected/TableS1_45.csv` and `expected/TableS2_21.csv` are the published SI answer keys used for verification.
 
 ## Repository structure
 
 ```text
-src/        physics-score pipeline (Stage 1), XGBoost extension (Stage 2), hardness model
-data/       MD descriptors (21 metals), calculated XRD peak counts, hardness (n=4)
-docs/       analysis & validation notes, DFT convergence, data dictionary, ranking dump
+src/        Layer-1 Physics Score + XGBoost extension; Layer-2 weighted ranking; hardness model
+data/       MD descriptors (21 metals), calculated XRD peaks, Table S2 objective values, hardness (n=4)
+expected/   published SI answer keys (Table S1 45-elem, Table S2 21-cand)
+docs/       analysis & validation notes, DFT convergence, data dictionary
 outputs/    reproduced result tables
 ```
 

@@ -33,9 +33,9 @@ These 21 values are the authoritative `outputs/physics_score_21metals.csv` and m
 
 **Model note.** The ranking uses XGBoost (Chen & Guestrin, 2016), the algorithm named in the manuscript. The 21 MD-data scores (including Ni = 282.19) are Stage-1 values and reproduce exactly.
 
-## 4. Stage 3 — chemistry / biocompatibility / synthesis filter
+## 4. Layer 2 — biocompatibility-weighted ranking (Table S2)
 
-The Physics Score is a physical-property screen and does not encode chemical viability. Top-ranked but unviable candidates are removed on independent grounds:
+The Layer-1 Physics Score is a physical-property screen. Layer 2 (`src/physics_score_S2_21candidates.py`, reproducing SI Table S2) re-ranks the 21 Pareto-viable candidates by a weighted sum that adds **LD50/IC50 biocompatibility as an explicit 20% objective** (Hardness 40 / CFSE 30 / Biocompatibility 20 / Lindemann 5 / dUtopia 5), giving **Ni = 97.2881, Rank #1**. This is the quantitative form of the chemical reasoning below — physically-strong but unsafe candidates lose biocompatibility points and fall:
 
 | candidate(s) | disposition |
 |---|---|

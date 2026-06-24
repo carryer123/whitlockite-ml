@@ -48,4 +48,4 @@ The viable, biocompatible, synthesizable survivors are 3d transition metals; **N
 
 ## 5. Conclusion
 
-The Physics-Score ranking (Ni #1), the XGBoost extension (Ni #1), and the Stage-3 chemistry filter together make **Ni the top-ranked viable substituent** in this computational screen. The hardness model and DFT (Sections in the README) give the mechanistic, CFSE-based rationale. The experimental confirmation of Ni's superior reinforcement is reported in the manuscript and its Supporting Information.
+The Layer-1 Physics Score (Ni #1), the XGBoost extension (Ni #1), and the Layer-2 biocompatibility-weighted ranking (Ni #1) together make **Ni the top-ranked viable substituent** in this computational screen. DFT (see README) gives the mechanistic, CFSE/Jahn-Teller rationale. The experimental confirmation of Ni's superior reinforcement is reported in the manuscript and its Supporting Information (independent of the ML ranking, which uses no measured hardness).

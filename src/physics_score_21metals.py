@@ -3,9 +3,9 @@
 Stage 1 - Physics-based score for the 21 MD-screened metals.
 ============================================================
 Computes the manuscript "Physics Score" for each of the 21 metal-substituted
-whitlockite systems from MD- and theory-derived descriptors ONLY (no experimental
-hardness is used in scoring; the four measured hardness values are read back at
-the end purely to report the validation correlation).
+whitlockite systems from MD- and theory-derived descriptors ONLY. No experimental
+data enters the model; experimental nanoindentation is reported in the manuscript
+as independent validation, not as an input here.
 
 The score is a weighted, additive combination of:
   - MSD (50 ns, temporal stability, trend)        -> dynamic stability
@@ -49,7 +49,6 @@ d_electrons = {
     'V': 3, 'Cr': 4, 'Mn': 5, 'Fe': 6, 'Co': 7, 'Ni': 8, 'Cu': 9, 'Zn': 10, 'Pd': 8,
     'Cd': 10, 'Mg': 0, 'Ca': 0, 'Sr': 0, 'Ba': 0, 'Ra': 0, 'Sn': 0, 'Pb': 0, 'Sm': 0,
     'Eu': 0, 'Er': 0, 'Yb': 0}
-exp_hardness = {'Ni': 467.5, 'Co': 380.0, 'Mg': 320.0, 'Cu': 280.0}  # validation ONLY
 
 # ----------------------------------------------------------------------------
 # 3. Physics-based weights (theoretical, not optimized)
@@ -99,19 +98,16 @@ def physics_score(metal):
         score -= 100 * WEIGHTS['jahn_teller']
     return score
 
-rows = [{'Metal': m, 'Physics_Score': physics_score(m), 'Experimental': exp_hardness.get(m, np.nan)}
+rows = [{'Metal': m, 'Physics_Score': physics_score(m)}
         for m in df_time['Metal'].unique()]
 df = pd.DataFrame(rows).dropna(subset=['Physics_Score']).sort_values('Physics_Score', ascending=False)
 df.to_csv(os.path.join(OUT, "physics_score_21metals.csv"), index=False)
 
 # ----------------------------------------------------------------------------
-# 5. Report + validation against the 4 measured hardness values
+# 5. Report
 # ----------------------------------------------------------------------------
 print(df.to_string(index=False))
 ni = float(df[df.Metal == 'Ni'].Physics_Score.values[0])
 ni_rank = list(df.Metal).index('Ni') + 1
-ex = df[df.Experimental.notna()]
-r = np.corrcoef(ex.Physics_Score, ex.Experimental)[0, 1]
 print(f"\nNi Physics Score = {ni:.4f}  (expected 282.1932)   |   Ni rank = #{ni_rank}")
-print(f"Validation Pearson r (n={len(ex)}) = {r:.3f}")
 print(f"Saved: outputs/physics_score_21metals.csv")

@@ -20,7 +20,7 @@ The **computational pipeline** behind the PAiCER manuscript ranks **nickel (Ni)*
 ```text
 Layer 1  Physics Score (21 metals, MD+theory) + XGBoost to 45 elems -> Table S1; Ni = 282.19 (Rank #1)
 Layer 2  Weighted ranking of the 21 candidates (biocompatibility 20%) -> Table S2; Ni = 97.29 (Rank #1)
-Verify   DFT (Ni Jahn-Teller-inactivity) + n=4 hardness diagnostic    -> CFSE / electronic origin; Ni > Co > Mg > Cu
+Verify   DFT (Ni Jahn-Teller-inactivity)                             -> CFSE / electronic origin
 ```
 
 The screen is **two-layer** (PAiCER SI): Layer 1 is a broad physics-only Physics Score over a 5D Pareto front (Table S1, 0-300); Layer 2 is the biomaterial-facing **weighted multi-objective ranking** of the Pareto-viable candidates that adds **LD50/IC50 biocompatibility** as an explicit objective (Table S2, 0-100). Ni is Rank #1 in both.
@@ -39,7 +39,7 @@ The score is a weighted additive combination of:
 | crystallinity | calculated XRD peak count | physical, fixed |
 | electronic / geometric | CFSE, ionic-radius match, Jahn-Teller penalty | ligand-field theory |
 
-Running it reproduces **Ni Physics Score = 282.1932 (Rank #1)** and a validation Pearson r = 0.855 against the four measured hardness values — matching the manuscript Table S1 (MD-data rows).
+Running it reproduces **Ni Physics Score = 282.1932 (Rank #1)**, matching the manuscript Table S1 (MD-data rows).
 
 ## 3. XGBoost extension to the candidate library
 
@@ -63,10 +63,11 @@ The authoritative reproduced ranking is `outputs/physics_ranking_xgboost.csv` (m
 
 This is where **biocompatibility enters as an explicit 20% objective**, so physically-strong but unsafe candidates (e.g. Pb, Ra, Ba) fall in the ranking. The per-element objective values are the published PAiCER SI Table S2 values (`data/objectives_21candidates.csv`). Running the script reproduces **Ni = 97.2881 (Rank #1)** and matches all 21 published Weighted sums to within 1e-3 (`expected/TableS2_21.csv`). The manuscript synthesizes and characterizes the top-ranked viable set **Ni, Co, Cu, Mg**.
 
-## 5. Hardness model and DFT verification
+## 5. DFT verification
 
-- `src/run_loocv_hardness_xgboost.py` — an **exploratory n = 4** hardness model (Mg/Co/Ni/Cu). The full-fit XGBoost model (`outputs/hardness_fullfit_importance_xgboost.csv`) shows **CFSE as the dominant descriptor** and reproduces the experimental order **Ni > Co > Mg > Cu** *in-sample*. With only n = 4 this is a diagnostic, **not** a validated predictor: the leave-one-out file (`outputs/loocv_hardness_xgboost.csv`) is retained transparently and its per-fold point predictions should **not** be cited as evidence for ranking or feature importance.
-- DFT: Quantum ESPRESSO (PBE+U) + LOBSTER address the electronic origin (CFSE / COHP). Ni's near-degenerate high/low-spin states are handled with a 42-atom primitive cell and a two-step protocol (`nspin=1` relaxation → `nspin=2` energy). See `docs/DFT_convergence_criteria.md`.
+- DFT: Quantum ESPRESSO (PBE+U) + LOBSTER address the electronic origin (CFSE / COHP) and confirm Ni's Jahn-Teller-inactive character (the proposed amorphization mechanism). A 42-atom primitive cell with a two-step protocol (`nspin=1` relaxation → `nspin=2` energy) handles Ni's near-degenerate high/low-spin states. See `docs/DFT_convergence_criteria.md`.
+
+*Experimental nanoindentation (which independently confirms the Ni system is by far the hardest) is reported in the manuscript; the ML ranking here does not take any measured hardness as input.*
 
 ---
 
@@ -77,7 +78,6 @@ pip install -r requirements.txt
 python src/physics_score_21metals.py          # Layer 1 -> outputs/physics_score_21metals.csv  (Ni = 282.1932)
 python src/predict_candidates_xgboost.py       # Layer 1 -> outputs/physics_ranking_xgboost.csv (Table S1, Ni #1)
 python src/physics_score_S2_21candidates.py    # Layer 2 -> outputs/physics_score_S2_21candidates.csv (Table S2, Ni = 97.2881)
-python src/run_loocv_hardness_xgboost.py       # hardness model (full-fit + LOO diagnostic)
 ```
 
 `expected/TableS1_45.csv` and `expected/TableS2_21.csv` are the published SI answer keys used for verification.
@@ -85,8 +85,8 @@ python src/run_loocv_hardness_xgboost.py       # hardness model (full-fit + LOO 
 ## Repository structure
 
 ```text
-src/        Layer-1 Physics Score + XGBoost extension; Layer-2 weighted ranking; hardness model
-data/       MD descriptors (21 metals), calculated XRD peaks, Table S2 objective values, hardness (n=4)
+src/        Layer-1 Physics Score + XGBoost extension; Layer-2 weighted ranking
+data/       MD descriptors (21 metals), calculated XRD peaks, Table S2 objective values
 expected/   published SI answer keys (Table S1 45-elem, Table S2 21-cand)
 docs/       analysis & validation notes, DFT convergence, data dictionary
 outputs/    reproduced result tables

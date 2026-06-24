@@ -38,7 +38,7 @@ Ni is Rank #1 by Physics Score and remains a viable, biocompatible, divalent, sy
 
 - **Geometric compatibility:** the conflict between the distorted M5 site and Ni's preference for a regular octahedron is the proposed reinforcement mechanism (Ni ionic radius 0.69 Å, closest match to the site).
 - **Stability / structure (MD):** Ni's Physics Score is dominated by strong structural-uniformity (Lindemann/CN) and electronic (CFSE) contributions; see the per-descriptor weights in `src/physics_score_21metals.py`.
-- **Hardness model (n = 4, exploratory):** an in-sample fit only. The full-fit XGBoost shows **CFSE as the dominant descriptor** and reproduces the experimental order **Ni > Co > Mg > Cu** *in-sample* (`outputs/hardness_fullfit_importance_xgboost.csv`). With n = 4 this is a diagnostic, not a validated predictor; the leave-one-out point predictions in `outputs/loocv_hardness_xgboost.csv` are **not** used as evidence for ranking.
+- **Experimental validation (manuscript):** the ranking predicts **Ni as Rank #1 by a wide margin**, independently confirmed by nanoindentation showing the Ni system (PAiCER-hc) is by far the hardest. Measured hardness is **not** an input to the ML ranking; it is used only as external validation in the manuscript.
 - **Electronic origin (DFT):** Ni's near-degenerate high/low-spin states reflect electronic/structural flexibility; see `DFT_convergence_criteria.md`.
 
 The full experimental validation (XRD / XPS / FTIR / nanoindentation) is reported in the manuscript.

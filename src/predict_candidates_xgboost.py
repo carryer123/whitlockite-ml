@@ -98,7 +98,6 @@ atomic_data = {
     'Rb':{'Z':37,'EA':46.9,'IE':403,'radius':1.52,'EN':0.82,'CFSE':0.0,'polar':47.3,'val_e':1,'d_elec':0,'JT':0},
     'Cs':{'Z':55,'EA':45.5,'IE':376,'radius':1.67,'EN':0.79,'CFSE':0.0,'polar':59.6,'val_e':1,'d_elec':0,'JT':0},
 }
-exp_hardness = {'Ni': 467.5, 'Co': 380.0, 'Mg': 320.0, 'Cu': 280.0}  # validation ONLY
 FEAT = ['Z', 'EA', 'IE', 'radius', 'EN', 'CFSE', 'polar', 'val_e', 'd_elec', 'JT']
 
 def vec(p):
@@ -119,9 +118,9 @@ known = dict(zip(df_physics.Metal, df_physics.Physics_Score))
 rows = []
 for m, p in atomic_data.items():
     if m in known:
-        rows.append({'Metal': m, 'Score': known[m], 'Type': 'MD Data', 'Experimental': exp_hardness.get(m, np.nan)})
+        rows.append({'Metal': m, 'Score': known[m], 'Type': 'MD Data'})
     else:
-        rows.append({'Metal': m, 'Score': float(model.predict(np.array([vec(p)]))[0]), 'Type': 'ML Prediction', 'Experimental': np.nan})
+        rows.append({'Metal': m, 'Score': float(model.predict(np.array([vec(p)]))[0]), 'Type': 'ML Prediction'})
 df = pd.DataFrame(rows).sort_values('Score', ascending=False).reset_index(drop=True)
 df['Rank'] = np.arange(1, len(df) + 1)
 df.to_csv(os.path.join(OUT, "physics_ranking_xgboost.csv"), index=False)
